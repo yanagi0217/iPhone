@@ -2,525 +2,594 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
-:root{--card:#fff;--ink:#171a23;--muted:#6b7280;--acc:#4f46e5;--line:#e6e8ee;--ok:#059669;--err:#b91c1c;--soft:#f6f7fb}
-@media(prefers-color-scheme:dark){:root{--card:#1b1f27;--ink:#eeede4;--line:#2b303a;--soft:#11151c}body{background:#0e1217}}
-*{box-sizing:border-box}
-body{margin:0;background:var(--soft);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;line-height:1.6}
-.wrap{padding:12px;max-width:700px;margin:0 auto}
-.hero{background:#4f46e5;color:#fff;border-radius:16px;padding:16px 18px;margin-bottom:12px}
-.hero h1{margin:0;font-size:18px;font-weight:500}
-.hero p{margin:4px 0 0;font-size:12px;opacity:.9}
-.tabs{display:flex;gap:6px;margin-bottom:12px}
-.tab{flex:1;padding:10px 6px;border:1px solid var(--line);background:var(--card);color:var(--muted);border-radius:11px;font-size:13px;font-family:inherit;font-weight:500;cursor:pointer}
-.tab.on{background:#4f46e5;color:#fff;border-color:#4f46e5}
-.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:12px}
-.card h2{margin:0 0 12px;font-size:13px;color:var(--muted);font-weight:500}
-.step{display:inline-block;width:18px;height:18px;border-radius:50%;background:#4f46e5;color:#fff;font-size:11px;line-height:18px;text-align:center;margin-right:6px}
-label{display:block;font-size:12.5px;color:var(--muted);margin-bottom:6px}
-select,input[type=text]{width:100%;padding:12px;border:1px solid var(--line);border-radius:11px;font-size:14px;font-family:inherit;background:var(--card);color:var(--ink)}
-textarea{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;font-size:13px;font-family:inherit;background:var(--card);color:var(--ink);resize:vertical;line-height:1.7}
-button{font-family:inherit;cursor:pointer}
-.big{width:100%;padding:15px;border-radius:13px;border:none;background:#4f46e5;color:#fff;font-size:15px;font-weight:500}
-.big:disabled{opacity:.55}
-.btn{padding:11px 14px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);font-size:13.5px;font-weight:500;text-decoration:none;display:inline-flex;align-items:center}
-.btn.danger{border-color:#fecaca;color:#b91c1c}
-.btn.line{border-color:#06c755;color:#06c755}
-.btn.main{background:#4f46e5;color:#fff;border-color:#4f46e5}
-.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;align-items:center}
-.plat{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
-.plat .btn{padding:9px 12px;font-size:12.5px;border-radius:9px}
-.opt{display:flex;gap:11px;align-items:flex-start;border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:8px;cursor:pointer}
-.opt:has(input:checked){border-color:#4f46e5;background:#eef2ff}
-@media(prefers-color-scheme:dark){.opt:has(input:checked){background:#1a1f2e}}
-.opt input{margin-top:3px}
-.opt b{font-size:13.5px;font-weight:500;display:block}
-.opt small{font-size:11.5px;color:var(--muted);display:block;margin-top:2px}
-.opt .demo{margin-left:auto;flex:0 0 74px;border:1px solid var(--line);border-radius:8px;background:var(--soft);height:44px;display:flex;align-items:center;justify-content:center;font-size:9.5px;color:var(--muted);text-align:center;padding:4px}
-.sw{display:flex;gap:11px;align-items:flex-start;cursor:pointer;margin:0}
-.sw input{margin-top:4px}
-.sw b{font-size:13.5px;font-weight:500;display:block}
-.sw small{font-size:11.5px;color:var(--muted);display:block;margin-top:2px}
-.hidden{display:none!important}
-.status{font-size:13.5px;color:var(--muted)}
-.addrbox{background:#eef2ff;border:1px solid #dfe3ff;border-radius:12px;padding:14px;margin-bottom:12px}
-@media(prefers-color-scheme:dark){.addrbox{background:#1a1f2e;border-color:#2b3550}}
-.addrbox .label{font-size:11px;color:var(--acc);font-weight:500;margin:0 0 4px}
-.addr{font-size:19px;font-weight:500;line-height:1.45;word-break:break-word}
-#map,#map2,#map0{height:210px;border-radius:12px;overflow:hidden;border:1px solid var(--line);margin-bottom:12px}
-.meta{width:100%;border-collapse:collapse;font-size:12.5px}
-.meta td{padding:7px 4px;border-bottom:1px solid var(--line);vertical-align:top}
-.meta td:first-child{color:var(--muted);width:34%;white-space:nowrap}
-.hint{font-size:11.5px;color:var(--muted);margin:8px 0 0}
-.err{color:var(--err);font-size:13px}
-.okmsg{color:var(--ok);font-size:12px}
-.tag{display:inline-block;font-size:10.5px;padding:1px 7px;border-radius:99px;background:#eef2ff;color:#4f46e5;margin-left:6px}
-.tag.g{background:#dcfce7;color:#15803d}
-.pulse{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--acc);margin-right:7px}
-.spin{display:inline-block;width:11px;height:11px;border:2px solid #c7c9f5;border-top-color:#4f46e5;border-radius:50%;animation:sp .7s linear infinite;vertical-align:-1px;margin-right:6px}
-@keyframes sp{to{transform:rotate(360deg)}}
-details{margin-top:8px;font-size:12px;color:var(--muted)}
-details pre{white-space:pre-wrap;word-break:break-all;font-size:11px;background:var(--soft);border:1px solid var(--line);border-radius:8px;padding:8px}
-.hist{display:flex;gap:8px;align-items:center;padding:11px 12px;border:1px solid var(--line);border-radius:11px;margin-bottom:8px;background:var(--card);cursor:pointer}
-.hist.on{border-color:#4f46e5}
-.hist b{font-size:13.5px;font-weight:500}
-.hist small{display:block;color:var(--muted);font-size:11px}
-.delx{padding:6px 10px;border:1px solid #fecaca;color:#b91c1c;background:transparent;border-radius:8px;font-size:11.5px;font-weight:500}
-.box{border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px}
-.box .t{font-size:12px;color:var(--muted);margin-bottom:6px}
-#recvMini{font-size:11.5px;color:var(--muted);padding:8px 2px;cursor:pointer;user-select:none}
-#recvMini .d{display:inline-block;width:6px;height:6px;border-radius:50%;background:#c8cbd3;margin-right:6px;vertical-align:1px}
-#recvMini.done .d{background:#22c55e}
-#recvBlank{height:46px;cursor:pointer}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;}
+body{background:#0e1116;color:#e6e8eb;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",sans-serif;font-size:14px;line-height:1.6;padding:16px 14px calc(84px + env(safe-area-inset-bottom));}
+.hidden{display:none!important;}
+.ttl{font-size:19px;font-weight:800;}
+.sub{font-size:11.5px;color:#8b93a0;margin:2px 0 14px;}
+.tabs{position:fixed;left:0;right:0;bottom:0;display:flex;background:#12161c;border-top:1px solid #1f242e;padding-bottom:env(safe-area-inset-bottom);z-index:60;}
+.tabs button{flex:1;background:none;border:0;color:#8b93a0;font-weight:700;font-size:12.5px;padding:15px 0;font-family:inherit;}
+.tabs button.on{color:#60a5fa;}
+.card{background:#151a21;border:1px solid #1f242e;border-radius:14px;padding:14px;margin-bottom:12px;}
+label{display:block;font-size:11.5px;color:#8b93a0;margin:12px 0 5px;}
+label:first-child{margin-top:0;}
+input,select,textarea{width:100%;background:#0d1117;border:1px solid #2a313c;color:#fff;border-radius:10px;padding:11px;font-size:16px;font-family:inherit;}
+textarea{min-height:74px;font-size:13px;line-height:1.65;}
+button{border:0;border-radius:10px;padding:12px 14px;font-size:13px;font-weight:700;font-family:inherit;background:#232a34;color:#dfe4ea;}
+button.pri{background:#1d4ed8;color:#fff;}
+button.dang{background:#3a1010;color:#f87171;}
+button.sm{padding:9px 10px;font-size:11.5px;}
+.row{display:flex;gap:8px;margin-top:10px;}
+.row.wrap{flex-wrap:wrap;}
+.row>button{flex:1;min-width:0;}
+.chk{display:flex;align-items:center;gap:9px;font-size:13px;color:#dfe4ea;margin:14px 0 0;font-weight:400;}
+.chk input{width:auto;padding:0;margin:0;transform:scale(1.15);}
+.link{background:#0a0d12;border:1px solid #1f242e;border-radius:10px;padding:10px;font-size:11.5px;word-break:break-all;color:#93c5fd;line-height:1.5;}
+.muted{font-size:11.5px;color:#8b93a0;margin-top:8px;}
+.h2{font-size:13px;font-weight:800;margin-bottom:8px;}
+.hit{background:#11161d;border:1px solid #1c222b;border-radius:10px;padding:10px 12px;margin-bottom:7px;}
+.hit .a{font-size:12.5px;color:#fff;font-weight:700;}
+.hit .m{display:flex;gap:9px;flex-wrap:wrap;font-size:10.5px;color:#8b93a0;margin-top:4px;}
+.tag{font-weight:800;padding:2px 7px;border-radius:99px;}
+.tg{background:#06331a;color:#4ade80;}
+.tb{background:#0d2340;color:#60a5fa;}
+#resMap{height:210px;border-radius:10px;margin-top:10px;overflow:hidden;}
+.hitem{display:flex;justify-content:space-between;align-items:center;gap:8px;background:#11161d;border:1px solid #1c222b;border-radius:10px;padding:10px 12px;margin-bottom:7px;}
+.hitem .n{font-size:12.5px;color:#fff;font-weight:700;}
+.hitem .d{font-size:10.5px;color:#8b93a0;}
+ol{padding-left:20px;margin:6px 0;font-size:12px;color:#a8b0bb;line-height:1.9;}
+code{background:#0a0d12;border-radius:4px;padding:1px 5px;font-size:11px;color:#93c5fd;}
 </style>
 </head>
 <body>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-<script>
-var UI=`
-<div class="wrap">
- <div id="viewHome">
-  <div class="hero"><h1>リンクで相手の住所を特定</h1><p>リンクを送るだけ。相手が開いた瞬間に住所が届きます。</p></div>
-  <div class="tabs">
-   <button class="tab on" data-t="send">1. 送る</button>
-   <button class="tab" data-t="res">2. 結果</button>
-   <button class="tab" data-t="set">設定</button>
-  </div>
-
-  <div id="tab-send">
-   <div class="card">
-    <h2><span class="step">1</span>誰に送る？（任意）</h2>
-    <input id="name" type="text" placeholder="例：田中">
-   </div>
-   <div class="card">
-    <h2><span class="step">2</span>相手の画面に何を出す？</h2>
-    <label class="opt"><input type="radio" name="sty" value="min" checked><span><b>極小</b><small>小さな点と一言だけ。ほぼ気づかれない</small></span><span class="demo">● 確認しました</span></label>
-    <label class="opt"><input type="radio" name="sty" value="blank"><span><b>真っ白</b><small>何も表示しない。完全に無言</small></span><span class="demo">（空白）</span></label>
-    <label class="opt"><input type="radio" name="sty" value="normal"><span><b>ふつう</b><small>住所と地図をドーンと表示</small></span><span class="demo">住所＋地図</span></label>
-   </div>
-   <div class="card">
-    <h2><span class="step">3</span>精度は？</h2>
-    <label class="sw"><input type="checkbox" id="useGps" checked><span><b>正確な位置まで取る（おすすめ）</b><small>番地レベル。ただし初回だけ相手に「許可？」が出ます</small></span></label>
-    <p class="hint">OFFにすると市区町村レベル（ダイアログ一切なし）</p>
-   </div>
-   <button id="mk" class="big">リンクを作る</button>
-
-   <div id="out" class="hidden">
-    <div id="mkStatus" class="hint"></div>
-
-    <div class="box">
-     <div class="t">送る文面（自由に編集OK）</div>
-     <select id="tpl">
-      <option value="0">かんたん（押させる率 重視）</option>
-      <option value="1">理由つき（納得感）</option>
-      <option value="2">控えめ（バレにくい）</option>
-      <option value="3">かっちり（仕事向け）</option>
-      <option value="4">ほぼ無言（最小限）</option>
-      <option value="5">文面なし（リンクだけ）</option>
-     </select>
-     <div style="height:8px"></div>
-     <textarea id="msg" rows="5"></textarea>
-     <div class="btns">
-      <button id="share" class="btn main">共有（Discordなど何でも）</button>
-      <button id="cpSend" class="btn">コピー</button>
-     </div>
-     <div class="plat">
-      <a id="lineSend" class="btn line" target="_blank" rel="noopener">LINE</a>
-      <a id="xSend" class="btn" target="_blank" rel="noopener">X</a>
-      <a id="mailSend" class="btn">メール</a>
-      <a id="smsSend" class="btn">SMS</a>
-      <a id="waSend" class="btn" target="_blank" rel="noopener">WhatsApp</a>
-      <a id="tgSend" class="btn" target="_blank" rel="noopener">Telegram</a>
-     </div>
-     <p class="hint">「共有」を押すと端末の共有シートが開きます。Discord・Instagram・Slack・Messengerなどはそこから。</p>
-    </div>
-
-    <div class="box">
-     <div class="t">リンクだけ（文面を使わない時）</div>
-     <input id="sendLink" readonly>
-    </div>
-    <div class="box">
-     <div class="t">結果を見るリンク（別の端末用）</div>
-     <input id="viewLink" readonly>
-     <div class="btns"><button id="cpView" class="btn">コピー</button></div>
-    </div>
-    <p class="hint">相手が開いたら「2. 結果」タブを見てください。</p>
-   </div>
-  </div>
-
-  <div id="tab-res" class="hidden">
-   <div class="card">
-    <h2>相手の住所</h2>
-    <div id="vStatus" class="status"><span class="pulse"></span>読み込み中…</div>
-    <div id="vResult" class="hidden">
-     <div class="addrbox"><div class="label">推定された住所 <span id="vsrc" class="tag">IP</span></div><div id="vaddr" class="addr">—</div></div>
-     <div id="map2"></div>
-     <table class="meta" id="vmeta"></table>
-     <p class="hint" id="vwhen"></p>
-    </div>
-    <div class="btns">
-     <button id="refresh" class="btn">更新</button>
-     <button id="del" class="btn danger">このリンクを停止</button>
-    </div>
-    <p class="hint">停止すると保存先が削除され、以後そのリンクは記録されなくなります。</p>
-   </div>
-   <div class="card">
-    <h2>履歴（タップで表示）</h2>
-    <div id="histList"></div>
-   </div>
-  </div>
-
-  <div id="tab-set" class="hidden">
-   <div class="card">
-    <h2>GitHubトークン（gist権限）</h2>
-    <input id="tok" type="text" placeholder="ghp_...">
-    <div class="btns"><button id="saveTok" class="big" style="width:auto">保存</button><span id="tokState" class="hint"></span></div>
-    <p class="hint">github.com/settings/tokens → Generate new token (classic) → スコープは gist だけ</p>
-   </div>
-   <div class="card">
-    <h2>自分の現在地（おまけ）</h2>
-    <div id="status" class="status"><span class="pulse"></span>取得しています…</div>
-    <div id="myresult" class="hidden">
-     <div class="addrbox"><div class="label">推定された住所 <span id="srcTag" class="tag">IP</span></div><div id="addr" class="addr">—</div></div>
-     <div id="map0"></div>
-     <table class="meta" id="meta"></table>
-     <div class="btns"><button id="myGps" class="btn">GPSで正確に</button></div>
-    </div>
-   </div>
-   <div class="card">
-    <h2>診断ログ</h2>
-    <details><summary>開く</summary><pre id="diagPre"></pre></details>
-    <div class="btns"><button id="test" class="btn">接続テスト</button></div>
-   </div>
-  </div>
- </div>
-
- <div id="viewRecv" class="hidden">
-  <div id="recvMini" class="hidden"><span class="d"></span><span id="miniTxt">読み込み中…</span></div>
-  <div id="recvBlank" class="hidden"></div>
-  <div id="recvFull" class="hidden">
-   <div class="hero"><h1 id="recvTitle">確認</h1><p id="recvSub">自動で処理されます。</p></div>
-   <div class="card">
-    <div id="recvStatus" class="status"><span class="pulse"></span>取得しています…</div>
-    <div id="recvResult" class="hidden">
-     <div class="addrbox"><div class="label">推定された住所 <span id="rsrc" class="tag">IP</span></div><div id="raddr" class="addr">—</div></div>
-     <div id="map"></div><table class="meta" id="rmeta"></table>
-     <div class="btns"><button id="recvGps" class="btn">GPSで正確に</button></div>
-     <div id="recvSend" class="okmsg"></div>
-    </div>
-   </div>
-  </div>
- </div>
-</div>`;
-document.body.insertAdjacentHTML("afterbegin",UI);
-</script>
+<div id="app"></div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 (function(){
 "use strict";
-var $=function(i){return document.getElementById(i)};
-var LOG=[];
-function logline(s){LOG.push(s);var d=$("diagPre");if(d)d.textContent=LOG.join("\n")}
-function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
-function show(i){$(i).classList.remove("hidden")}
-function hide(i){$(i).classList.add("hidden")}
-function J(t){try{return JSON.parse(t)}catch(e){return null}}
-function copyText(t,btn){
- var done=function(){if(!btn)return;var o=btn.textContent;btn.textContent="コピーしました";setTimeout(function(){btn.textContent=o},1400)};
- if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(done).catch(fb)}else fb();
- function fb(){var ta=document.createElement("textarea");ta.value=t;ta.style.position="fixed";ta.style.opacity="0";document.body.appendChild(ta);ta.select();try{document.execCommand("copy")}catch(e){}document.body.removeChild(ta);done()}
+
+/* ===================== 基本 ===================== */
+var $ = function(id){ return document.getElementById(id); };
+var hp = new URLSearchParams(location.hash.replace(/^#/,""));
+var TOKEN = hp.get("t") || localStorage.getItem("loclink_tok") || "";
+if (hp.get("t")) localStorage.setItem("loclink_tok", hp.get("t"));
+var GH = "https://api.github.com/gists";
+var NAME = hp.get("n") || "";
+var RID  = (hp.get("r") || "").replace(/^gh/,"");
+var V    = hp.get("v") || "";
+var GF   = hp.get("g") || "";
+var BASE = location.origin + location.pathname;
+var HIST = "loclink_hist";
+var isLine = /Line\//i.test(navigator.userAgent);
+
+function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g,function(m){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m];}); }
+function req(method,url,headers,body){
+  return new Promise(function(res,rej){
+    var x = new XMLHttpRequest(); x.open(method,url,true); x.timeout = 20000;
+    Object.keys(headers||{}).forEach(function(k){ x.setRequestHeader(k,headers[k]); });
+    x.onload  = function(){ res({ok:x.status>=200&&x.status<300, status:x.status, text:x.responseText}); };
+    x.onerror = function(){ rej(new Error("network")); };
+    x.ontimeout = function(){ rej(new Error("timeout")); };
+    x.send(body ? JSON.stringify(body) : null);
+  });
+}
+function gh(h){ var o = {"Content-Type":"application/json"}; if(TOKEN) o["Authorization"] = "Bearer " + TOKEN; return Object.assign(o, h||{}); }
+function fix(hi){ return new Promise(function(res,rej){ navigator.geolocation.getCurrentPosition(res,rej,{enableHighAccuracy:hi,timeout:hi?15000:6000,maximumAge:0}); }); }
+function rev(lat,lon){
+  return req("GET","https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat="+lat+"&lon="+lon+"&accept-language=ja")
+    .then(function(r){ var j = JSON.parse(r.text); return j.display_name || ""; }).catch(function(){ return ""; });
+}
+function ipOnly(){
+  return req("GET","https://ipwho.is/").then(function(r){
+    var j = JSON.parse(r.text); if(j && j.city) return (j.region? j.region+" " : "") + j.city; return "";
+  }).catch(function(){
+    return req("GET","https://ipapi.co/json/").then(function(r){
+      var j = JSON.parse(r.text); return (j.region? j.region+" " : "") + (j.city||"");
+    }).catch(function(){ return ""; });
+  });
+}
+function devName(){
+  var ua = navigator.userAgent;
+  var os = /iPhone|iPad/.test(ua) ? "iPhone" : (/Android/.test(ua) ? "Android" : "PC");
+  var br = /Line\//i.test(ua) ? "LINE内" : (/CriOS|Chrome/.test(ua) ? "Chrome" : (/Safari/.test(ua) ? "Safari" : "その他"));
+  return os + " / " + br;
 }
 
-var TPL=[
- "これ開いてみて！「位置情報を許可しますか？」って出たら「許可」押しといて〜",
- "待ち合わせ用にこれ送るね。開いたら「許可」って出るから、そこだけ押しといて！",
- "これ開いてみて。なんか出たら「許可」でいいよ〜",
- "共有リンクです。開いていただき、位置情報の許可をお願いします。",
- "これ開くだけでOK。位置情報の「許可」だけ押してね。",
- ""
-];
+/* ===================== Gist ===================== */
+function createGist(){
+  return req("POST", GH, gh(), { description:"loclink", public:false, files:{ "hits.json":{content:"[]"} } })
+    .then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); var j = JSON.parse(r.text); return j.id; });
+}
+function readGist(id){
+  return req("GET", GH+"/"+id, gh()).then(function(r){
+    if(!r.ok) throw new Error("HTTP "+r.status);
+    var j = JSON.parse(r.text), hits = [], loc = null;
+    try{ hits = JSON.parse((j.files["hits.json"] && j.files["hits.json"].content) || "[]"); }catch(e){ hits = []; }
+    try{ loc = JSON.parse((j.files["loc.json"] && j.files["loc.json"].content) || "null"); }catch(e){ loc = null; }
+    if(!Array.isArray(hits)) hits = [];
+    return { hits:hits, last:(hits.length ? hits[hits.length-1] : loc) };
+  });
+}
+function record(id, p){
+  if(!id || !TOKEN) return Promise.resolve();
+  return req("GET", GH+"/"+id, gh()).then(function(r){
+    var j = {}; try{ j = JSON.parse(r.text); }catch(e){}
+    var arr = [];
+    try{ arr = JSON.parse((j.files && j.files["hits.json"] && j.files["hits.json"].content) || "[]"); }catch(e){ arr = []; }
+    if(!Array.isArray(arr)) arr = [];
+    arr.push(Object.assign({ts:Date.now(), name:NAME, dev:devName()}, p));
+    if(arr.length > 300) arr = arr.slice(-300);
+    var b = { files:{} }; b.files["hits.json"] = { content: JSON.stringify(arr) };
+    return req("PATCH", GH+"/"+id, gh(), b);
+  }).catch(function(){});
+}
+function stopGist(id){ return req("DELETE", GH+"/"+id, gh()); }
 
-var proxyState=null;
-function px(u){return location.origin+"/sandbox/proxy?url="+encodeURIComponent(u)}
-function raw(method,url,opts){
- opts=opts||{};
- return new Promise(function(res,rej){
-  var x=new XMLHttpRequest();
-  try{x.open(method,url,true)}catch(e){rej(e);return}
-  if(opts.headers)for(var k in opts.headers){try{x.setRequestHeader(k,opts.headers[k])}catch(e){}}
-  x.timeout=opts.timeout||20000;
-  x.onload=function(){res({ok:x.status>=200&&x.status<300,status:x.status,text:x.responseText})};
-  x.onerror=function(){rej(new Error("network error"))};
-  x.ontimeout=function(){rej(new Error("timeout"))};
-  try{x.send(opts.body!=null?opts.body:null)}catch(e){rej(e)}
- });
-}
-async function req(method,url,opts){
- if(proxyState!==false){
-  try{
-   var r=await raw(method,px(url),opts);
-   if(r.status===404||r.status===405){if(proxyState===true)return r;proxyState=false}
-   else{proxyState=true;return r}
-  }catch(e){if(proxyState===true)throw e;proxyState=false}
- }
- return await raw(method,url,opts);
-}
+/* ===================== 履歴 ===================== */
+function getHist(){ try{ return JSON.parse(localStorage.getItem(HIST) || "[]"); }catch(e){ return []; } }
+function setHist(a){ try{ localStorage.setItem(HIST, JSON.stringify(a.slice(0,80))); }catch(e){} }
+function fmtDT(ts){ var d = new Date(ts), p = function(n){ return ("0"+n).slice(-2); };
+  return (d.getMonth()+1)+"/"+d.getDate()+" "+p(d.getHours())+":"+p(d.getMinutes()); }
 
-function mapWho(d){return{lat:+d.latitude,lon:+d.longitude,ip:d.ip,city:d.city,region:d.region,country:d.country,postal:d.postal,isp:(d.connection&&(d.connection.isp||d.connection.org))||"",tz:(d.timezone&&d.timezone.id)||""}}
-function mapApi(d){return{lat:+d.latitude,lon:+d.longitude,ip:d.ip,city:d.city,region:d.region,country:d.country_name,postal:d.postal,isp:d.org||"",tz:d.timezone||""}}
-async function ipLoc(){
- var S=[["ipwho.is","https://ipwho.is/",mapWho],["ipapi.co","https://ipapi.co/json/",mapApi]];
- for(var i=0;i<S.length;i++){
-  try{var r=await req("GET",S[i][1],{timeout:15000});var d=J(r.text);
-   if(d&&d.latitude!=null&&d.success!==false)return S[i][2](d)}catch(e){logline("IP "+S[i][0]+" 失敗:"+e.message)}
- }
- throw new Error("IP取得失敗");
-}
-async function reverse(lat,lon){
- try{var r=await req("GET","https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat="+lat+"&lon="+lon+"&accept-language=ja&zoom=18",{timeout:15000});
-  var d=J(r.text);return (d&&d.display_name)||""}catch(e){return ""}
-}
-function compose(o){var p=[o.country,o.region,o.city];if(o.postal)p.push("〒"+o.postal);return p.filter(Boolean).join(" ")}
-function fillMeta(id,o){
- var rows=[["IPアドレス",o.ip||"—"],["国",o.country||"—"],["都道府県/州",o.region||"—"],["市区町村",o.city||"—"],["郵便番号",o.postal||"—"],["緯度・経度",(+o.lat).toFixed(6)+", "+(+o.lon).toFixed(6)]];
- if(o.acc_m)rows.push(["精度","±"+o.acc_m+"m"]);
- rows.push(["プロバイダ",o.isp||"—"]);rows.push(["タイムゾーン",o.tz||"—"]);
- $(id).innerHTML=rows.map(function(r){return "<tr><td>"+esc(r[0])+"</td><td>"+esc(r[1])+"</td></tr>"}).join("");
-}
-var maps={};
-function drawMap(cid,lat,lon,z){
- if(!window.L||!$(cid))return;
- if(!maps[cid]){
-  maps[cid]=L.map(cid,{scrollWheelZoom:false}).setView([lat,lon],z||13);
-  L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key=cb1_2nve_1_afe1da6ca18e958f7724fb54",{maxZoom:19,attribution:"© OpenStreetMap © CartoDB"}).addTo(maps[cid]);
- } else maps[cid].setView([lat,lon],z||16);
- var m=maps[cid];if(m.__mk)m.removeLayer(m.__mk);
- m.__mk=L.marker([lat,lon]).addTo(m);
- setTimeout(function(){m.invalidateSize()},200);
+/* ===================== 地図 ===================== */
+var maps = {};
+function drawMap(elId, lat, lon, dark){
+  if(!$(elId)) return;
+  var el = $(elId);
+  setTimeout(function(){
+    var m = maps[elId];
+    if(!m){ m = L.map(el, {zoomControl:false, attributionControl:false}); maps[elId] = m; }
+    var url = dark ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                   : "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png";
+    if(!m.__tiles){ m.__tiles = L.tileLayer(url,{maxZoom:19}).addTo(m); } else { m.__tiles.setUrl(url); }
+    m.setView([lat,lon], 16);
+    if(m.__mk) m.removeLayer(m.__mk);
+    m.__mk = L.marker([lat,lon]).addTo(m);
+    setTimeout(function(){ m.invalidateSize(); }, 180);
+  }, 60);
 }
 
-var TOKEN=localStorage.getItem("loclink_tok")||"";
-var HIST=J(localStorage.getItem("loclink_hist")||"[]")||[];
-var curId=null,curLink="",curTplText="";
-var GH="https://api.github.com/gists";
-function ghH(){return{"Content-Type":"application/json","Authorization":"Bearer "+TOKEN}}
-async function createBlob(data){
- if(!TOKEN)return null;
- var r=await req("POST",GH,{headers:ghH(),body:JSON.stringify({description:"loclink",public:false,files:{"loc.json":{content:JSON.stringify(data)}}}),timeout:20000});
- var o=J(r.text);if(!r.ok||!o||!o.id)throw new Error("HTTP "+r.status);
- logline("Gist作成 OK");return o.id;
-}
-async function writeBlob(id,data){
- var r=await req("PATCH",GH+"/"+id,{headers:ghH(),body:JSON.stringify({files:{"loc.json":{content:JSON.stringify(data)}}}),timeout:20000});
- if(!r.ok)throw new Error("HTTP "+r.status);
-}
-async function readBlob(id){
- var r=await req("GET",GH+"/"+id,{timeout:15000});
- if(!r.ok)throw new Error("HTTP "+r.status);
- var o=J(r.text),c=o&&o.files&&o.files["loc.json"]&&o.files["loc.json"].content;
- return c?J(c):null;
-}
-async function deleteBlob(id){
- var r=await req("DELETE",GH+"/"+id,{headers:ghH(),timeout:15000});
- if(!r.ok&&r.status!==404)throw new Error("HTTP "+r.status);
-}
+/* =====================================================================
+   受信側
+   ===================================================================== */
+if(RID){
+  var S = { lat:null, lon:null, addr:"", acc:null, ip:"", gps:false };
 
-function buildMsg(){
- curTplText=TPL[+$("tpl").value];
- $("msg").value = curTplText ? (curTplText+"\n"+curLink) : curLink;
- syncSend();
-}
-function syncSend(){
- var t=$("msg").value, e=encodeURIComponent(t);
- $("lineSend").href="https://line.me/R/msg/text/?"+e;
- $("xSend").href="https://twitter.com/intent/tweet?text="+e;
- $("mailSend").href="mailto:?subject="+encodeURIComponent("位置確認")+"&body="+e;
- $("smsSend").href="sms:&body="+e;
- $("waSend").href="https://wa.me/?text="+e;
- $("tgSend").href="https://t.me/share/url?url="+encodeURIComponent(curLink)+"&text="+encodeURIComponent(curTplText||"");
-}
-function doShare(){
- var t=$("msg").value;
- if(navigator.share){
-  navigator.share({text:t}).catch(function(e){ if(e&&e.name==="AbortError")return; copyText(t,$("cpSend")); });
- } else {
-  copyText(t,$("cpSend"));
-  alert("この環境では共有シートが使えないのでコピーしました。貼り付けて送ってください。");
- }
-}
+  function report(){
+    return record(RID, { lat:S.lat, lon:S.lon, addr:S.addr, acc:S.acc, gps:S.gps, city:S.ip });
+  }
 
-function tab(t){
- [].forEach.call(document.querySelectorAll(".tab"),function(b){b.classList.toggle("on",b.getAttribute("data-t")===t)});
- hide("tab-send");hide("tab-res");hide("tab-set");show("tab-"+t);
- if(t==="res")renderHist();
-}
-[].forEach.call(document.querySelectorAll(".tab"),function(b){b.onclick=function(){tab(b.getAttribute("data-t"))}});
-
-function renderHist(){
- var box=$("histList");
- if(!HIST.length){box.innerHTML='<p class="hint">まだリンクを作っていません。</p>';return}
- box.innerHTML=HIST.map(function(h,i){
-  return '<div class="hist'+(h.id===curId?" on":"")+'" data-i="'+i+'"><span style="flex:1"><b>'+esc(h.name||"（名前なし）")+'</b><small>'+new Date(h.at).toLocaleString("ja-JP")+'</small></span><button class="delx" data-d="'+i+'">停止</button></div>';
- }).join("");
- [].forEach.call(box.querySelectorAll(".hist"),function(el){
-  el.onclick=function(){var h=HIST[+el.getAttribute("data-i")];curId=h.id;renderHist();loadResult(h.id)};
- });
- [].forEach.call(box.querySelectorAll(".delx"),function(el){
-  el.onclick=function(ev){ev.stopPropagation();stopLink(HIST[+el.getAttribute("data-d")].id)};
- });
-}
-function removeHist(id){
- HIST=HIST.filter(function(h){return h.id!==id});
- localStorage.setItem("loclink_hist",JSON.stringify(HIST));
- if(curId===id){curId=null;hide("vResult");$("vStatus").textContent="停止しました";}
- renderHist();
-}
-async function stopLink(id){
- if(!id){$("vStatus").textContent="対象のリンクがありません";return}
- if(!confirm("このリンクを停止しますか？（保存先を削除します。記録済みの住所も消えます）"))return;
- try{await deleteBlob(id)}catch(e){alert("停止に失敗: "+e.message);return}
- logline("停止: "+id);removeHist(id);
-}
-
-function getPos(hi,ms){return new Promise(function(res,rej){navigator.geolocation.getCurrentPosition(res,rej,{enableHighAccuracy:hi,timeout:ms,maximumAge:0})})}
-async function refine(cid,addrEl,srcEl,cur,cb){
- if(!navigator.geolocation){logline("GPS非対応");if(cb)cb(null);return}
- var pos=null;
- try{pos=await getPos(true,22000)}
- catch(e1){logline("高精度失敗→通常で再試行");try{pos=await getPos(false,15000)}catch(e2){logline("GPS失敗:"+e2.message);if(cb)cb(null);return}}
- var lat=pos.coords.latitude,lon=pos.coords.longitude;
- cur.acc_m=Math.round(pos.coords.accuracy||0);
- var full=await reverse(lat,lon);
- cur.lat=lat;cur.lon=lon;cur.addr=full||("緯度経度 "+lat.toFixed(6)+", "+lon.toFixed(6));cur.acc="gps";
- if(addrEl)$(addrEl).textContent=cur.addr;
- if(srcEl){$(srcEl).textContent="GPS";$(srcEl).className="tag g"}
- fillMeta(cid==="map"?"rmeta":"meta",cur);
- drawMap(cid,lat,lon,17);
- if(cb)cb(cur);
-}
-
-function startHome(){
- show("viewHome");document.title="リンクで住所特定";
- if(TOKEN)$("tok").value=TOKEN;
- $("tokState").innerHTML=TOKEN?'<span class="okmsg">設定済み</span>':'<span class="err">未設定</span>';
- $("saveTok").onclick=async function(){
-  var v=$("tok").value.trim();
-  if(!v){localStorage.removeItem("loclink_tok");TOKEN="";$("tokState").textContent="消しました";return}
-  $("tokState").innerHTML='<span class="spin"></span>確認中…';
-  try{
-   var r=await req("GET","https://api.github.com/user",{headers:{"Authorization":"Bearer "+v},timeout:15000});
-   if(r.ok){var o=J(r.text);localStorage.setItem("loclink_tok",v);TOKEN=v;$("tokState").innerHTML='<span class="okmsg">OK: @'+esc(o.login||"")+'</span>'}
-   else $("tokState").innerHTML='<span class="err">無効（HTTP '+r.status+'）</span>';
-  }catch(e){$("tokState").innerHTML='<span class="err">'+esc(e.message)+'</span>'}
- };
- $("mk").onclick=makeLink;
- $("tpl").onchange=buildMsg;
- $("msg").oninput=syncSend;
- $("share").onclick=doShare;
- $("cpSend").onclick=function(){copyText($("msg").value,this)};
- $("cpView").onclick=function(){copyText($("viewLink").value,this)};
- $("test").onclick=function(){logline("--- テスト ---");createBlob({test:1}).then(function(id){logline(id?"テスト OK":"トークン未設定")}).catch(function(e){logline("テスト失敗: "+e.message)})};
- $("refresh").onclick=function(){if(curId)loadResult(curId)};
- $("del").onclick=function(){stopLink(curId)};
-
- var cur={};
- (async function(){
-  try{var o=await ipLoc();cur=o;$("addr").textContent=compose(o);fillMeta("meta",o);
-   $("status").innerHTML='<span class="okmsg">取得しました</span>';show("myresult");drawMap("map0",o.lat,o.lon,13);
-   $("myGps").onclick=function(){$("myGps").textContent="取得中…";refine("map0","addr","srcTag",cur,function(){$("myGps").textContent="GPSで正確に"})};
-  }catch(e){$("status").innerHTML='<span class="err">取得失敗</span>'}
- })();
-}
-function makeLink(){
- var self=this,name=$("name").value.trim();
- var sty=document.querySelector('input[name=sty]:checked').value;
- var g=$("useGps").checked?"&g=1":"";
- show("out");$("mkStatus").innerHTML='<span class="spin"></span>作成中…';self.disabled=true;
- (async function(){
-  var base=location.href.split("#")[0];
-  logline("--- リンク作成 ---");
-  var id;
-  try{id=await createBlob({waiting:true,at:Date.now()})}
-  catch(e){$("mkStatus").innerHTML='<span class="err">作成失敗: '+esc(e.message)+'</span>';self.disabled=false;self.textContent="リンクを作る";return}
-  if(!id){$("mkStatus").innerHTML='<span class="err">トークン未設定（設定タブ）</span>';self.disabled=false;self.textContent="リンクを作る";return}
-  curLink=base+"#n="+encodeURIComponent(name)+"&r="+id+"&v="+sty+g+(TOKEN?"&t="+encodeURIComponent(TOKEN):"");
-  $("sendLink").value=curLink;$("viewLink").value=base+"#r="+id;
-  buildMsg();
-  HIST.unshift({id:id,name:name,at:Date.now()});HIST=HIST.slice(0,20);
-  localStorage.setItem("loclink_hist",JSON.stringify(HIST));
-  curId=id;
-  $("mkStatus").innerHTML='<span class="okmsg">できました。下のボタンから送ってください。</span>';
-  self.disabled=false;self.textContent="作り直す";
- })();
-}
-
-var vt=null,vc=0;
-async function loadResult(id){
- if(!id)return;
- vc=0;if(vt){clearInterval(vt);vt=null}
- show("vStatus");$("vStatus").innerHTML='<span class="pulse"></span>読み込み中…';hide("vResult");
- var once=async function(){
-  vc++;
-  try{
-   var d=await readBlob(id);
-   if(d&&d.lat!=null){
-    $("vaddr").textContent=d.addr||(d.country+" "+d.region+" "+d.city);
-    $("vsrc").textContent=d.acc==="gps"?"GPS":"IP";$("vsrc").className=d.acc==="gps"?"tag g":"tag";
-    fillMeta("vmeta",d);
-    $("vStatus").innerHTML='<span class="okmsg">取得しました</span>';show("vResult");drawMap("map2",d.lat,d.lon,d.acc==="gps"?17:13);
-    $("vwhen").textContent="記録: "+new Date(d.at||Date.now()).toLocaleString("ja-JP")+(d.acc_m?("　精度 ±"+d.acc_m+"m"):"");
-    if(vt){clearInterval(vt);vt=null}
-   }else if(vc>=15){
-    if(vt){clearInterval(vt);vt=null}
-    $("vStatus").innerHTML='<span class="pulse"></span>まだ開かれていません。「更新」で再確認。';
-   }else $("vStatus").innerHTML='<span class="pulse"></span>まだ開かれていません。（'+vc+'/15）';
-  }catch(e){$("vStatus").innerHTML='<span class="err">読み込み失敗: '+esc(e.message)+'</span>'}
- };
- await once();
- if(!vt)vt=setInterval(function(){if(vc>=15){clearInterval(vt);vt=null;return}once()},20000);
-}
-
-function startRecv(){
- hide("viewHome");show("viewRecv");
- var hp=new URLSearchParams(location.hash.replace(/^#/,""));
- var N=hp.get("n")||"",R=hp.get("r")||"",G=hp.get("g")==="1",V=hp.get("v")||"normal";
- if(hp.get("t"))localStorage.setItem("loclink_tok",hp.get("t"));
- var cur={};
- if(V==="blank"){show("recvBlank");document.title="";$("recvBlank").onclick=function(){show("recvFull")}}
- else if(V==="min"){show("recvMini");document.title="";$("recvMini").onclick=function(){$("recvFull").classList.toggle("hidden")}}
- else{show("recvFull");document.title="確認";if(N)$("recvTitle").textContent=N+" さんからのリンクです"}
- if(V==="min"&&G)$("miniTxt").textContent="位置情報を「許可」してください";
- (async function(){
-  try{
-   var o=await ipLoc();cur=o;var a=compose(o);
-   $("raddr").textContent=a;fillMeta("rmeta",o);show("recvResult");
-   $("recvStatus").innerHTML='<span class="okmsg">完了</span>';drawMap("map",o.lat,o.lon,13);
-   function save(){
-    if(!R)return;
-    writeBlob(R,{lat:cur.lat,lon:cur.lon,ip:cur.ip,city:cur.city,region:cur.region,country:cur.country,postal:cur.postal,isp:cur.isp,tz:cur.tz,addr:cur.addr||a,acc:cur.acc||"ip",acc_m:cur.acc_m||0,at:Date.now()})
-     .then(function(){$("recvSend").textContent=cur.acc==="gps"?"（GPSで保存しました）":"（自動で保存しました）"})
-     .catch(function(e){$("recvSend").innerHTML=/404/.test(e.message)?'<span style="color:var(--muted)">（このリンクは終了しています）</span>':'<span class="err">保存に失敗: '+esc(e.message)+'</span>'});
-   }
-   save();
-   var doGps=function(){
-    $("recvGps").textContent="取得中…";if(V==="min")$("miniTxt").textContent="位置を取得中…";
-    refine("map","raddr","rsrc",cur,function(){
-     $("recvGps").textContent="GPSで正確に";
-     if(V==="min"){$("miniTxt").textContent="確認しました";$("recvMini").classList.add("done")}
-     save();
+  function capture(){
+    return ipOnly().then(function(c){
+      S.ip = c;
+      if(!GF || !navigator.geolocation) return report();
+      return fix(false).then(function(p){
+        S.lat = p.coords.latitude; S.lon = p.coords.longitude; S.acc = Math.round(p.coords.accuracy); S.gps = true;
+        return rev(S.lat,S.lon).then(function(a){ S.addr = a; return report(); });
+      }).catch(function(){ return report(); });
     });
-   };
-   $("recvGps").onclick=doGps;
-   if(G)doGps();
-   else if(V==="min"){$("miniTxt").textContent="確認しました";$("recvMini").classList.add("done")}
-  }catch(e){$("recvStatus").innerHTML='<span class="err">取得に失敗しました</span>';if(V==="min")$("miniTxt").textContent="失敗"}
- })();
+  }
+
+  /* ---- ふつう: カード表示 ---- */
+  function normalView(){
+    var app = $("app");
+    app.innerHTML =
+      '<div class="card" style="margin-top:8px;">'
+      + '<div id="rcIcon" style="font-size:26px;margin-bottom:6px;">📍</div>'
+      + '<div id="rcTtl" style="font-size:16px;font-weight:800;margin-bottom:6px;">特定しています…</div>'
+      + '<div id="rcAddr" style="font-size:13.5px;color:#dfe4ea;line-height:1.7;"></div>'
+      + '<div id="rcMeta" class="muted"></div>'
+      + '<div id="rcMap"></div>'
+      + '<div class="row"><button id="rcMore" class="hidden">もっと正確にする</button></div>'
+      + '<div class="muted" id="rcBack" style="text-align:center;padding-top:12px;">← アプリに戻る</div>'
+      + '</div>';
+    $("rcBack").onclick = function(){ location.href = BASE; };
+
+    capture().then(function(){
+      $("rcIcon").textContent = "✅";
+      $("rcTtl").textContent = "特定しました";
+      $("rcAddr").textContent = S.addr || S.ip || "";
+      $("rcMeta").textContent = (S.gps ? "GPS 精度 ±"+S.acc+"m" : "IP（市レベル）") + (NAME ? " ／ " + NAME + "さんからのリンク" : "");
+      if(S.lat) drawMap("rcMap", S.lat, S.lon, true);
+      if(!S.gps && navigator.geolocation){
+        $("rcMore").classList.remove("hidden");
+        $("rcMore").onclick = function(){
+          $("rcMore").textContent = "取得中…";
+          fix(true).then(function(p){
+            S.lat = p.coords.latitude; S.lon = p.coords.longitude; S.acc = Math.round(p.coords.accuracy); S.gps = true;
+            return rev(S.lat,S.lon).then(function(a){ S.addr = a; return report(); });
+          }).then(function(){
+            $("rcAddr").textContent = S.addr; $("rcMeta").textContent = "GPS 精度 ±"+S.acc+"m";
+            drawMap("rcMap", S.lat, S.lon, true); $("rcMore").classList.add("hidden");
+          }).catch(function(){ $("rcMore").textContent = "取得できませんでした"; });
+        };
+      }
+    });
+  }
+
+  /* ---- 極小: 1行だけ ---- */
+  function minView(){
+    document.body.style.background = "#fff";
+    document.body.style.color = "#111";
+    document.body.style.padding = "0";
+    var d = document.createElement("div");
+    d.setAttribute("style","padding:11px 13px;font-size:11px;color:#9aa0a6;cursor:pointer;-webkit-text-size-adjust:100%;");
+    d.textContent = "✓ 確認しました";
+    document.body.appendChild(d);
+    var open = false;
+    d.onclick = function(){
+      open = !open;
+      if(open){
+        if(!$("mnBox")){
+          var b = document.createElement("div");
+          b.id = "mnBox";
+          b.setAttribute("style","margin:0 13px;padding:12px;background:#fff;border:1px solid #eee;border-radius:12px;font-size:12.5px;color:#333;");
+          b.innerHTML = '<div id="mnAddr" style="line-height:1.7;"></div><div id="mnMeta" style="font-size:10.5px;color:#aaa;margin-top:6px;"></div>';
+          document.body.appendChild(b);
+        }
+        $("mnBox").classList.remove("hidden");
+        capture().then(function(){
+          $("mnAddr").textContent = S.addr || S.ip || "取得できませんでした";
+          $("mnMeta").textContent = (S.gps ? "GPS ±"+S.acc+"m" : "IP（市レベル）");
+        });
+      } else if($("mnBox")) $("mnBox").classList.add("hidden");
+    };
+    capture();
+  }
+
+  /* ---- 確実: 許可を最大化する画面 ---- */
+  function goView(){
+    var ov = document.createElement("div");
+    ov.setAttribute("style","position:fixed;top:0;left:0;right:0;bottom:0;z-index:99999;background:#fff;color:#111;"
+      + "-webkit-text-size-adjust:100%;display:flex;align-items:center;justify-content:center;padding:26px;");
+    document.body.style.padding = "0";
+    document.body.appendChild(ov);
+    var st = "ask";
+
+    function paint(){
+      var h = "";
+      if(st === "ask"){
+        h = '<div style="text-align:center;max-width:400px;width:100%;">'
+          + '<div style="font-size:32px;line-height:1;margin-bottom:14px;">📍</div>'
+          + '<div style="font-size:19px;font-weight:800;margin-bottom:10px;">正確な現在地を特定します</div>'
+          + '<div style="font-size:13.5px;line-height:1.85;color:#555;">位置情報の使用を<b>「許可」</b>してください。<br>市レベルから番地レベルまで精度が上がります。</div>'
+          + '<button id="goBtn" style="margin-top:24px;width:100%;padding:17px;border-radius:14px;background:#1d4ed8;color:#fff;font-size:16px;font-weight:800;">許可する</button>'
+          + '<div style="font-size:11px;color:#9aa0a6;margin-top:10px;">1タップで終わります</div>'
+          + (S.ip ? '<div style="font-size:11.5px;color:#9aa0a6;margin-top:18px;">いまの精度：'+esc(S.ip)+'（市レベル）</div>' : "")
+          + (isLine ? '<div style="font-size:11px;color:#9aa0a6;margin-top:14px;line-height:1.6;">LINE内ブラウザです。取れない時は右上の ⋯ から「ブラウザで開く」を選んでください。</div>' : "")
+          + '</div>';
+      } else if(st === "busy"){
+        h = '<div style="text-align:center;">'
+          + '<div style="font-size:32px;margin-bottom:14px;">📡</div>'
+          + '<div style="font-size:17px;font-weight:800;margin-bottom:8px;">衛星を探しています…</div>'
+          + '<div style="font-size:12.5px;color:#888;">'+(S.acc ? "精度 ±"+S.acc+"m" : "そのままお待ちください")+'</div></div>';
+      } else if(st === "done"){
+        h = '<div style="text-align:center;max-width:400px;width:100%;">'
+          + '<div style="font-size:32px;margin-bottom:12px;">✅</div>'
+          + '<div style="font-size:17px;font-weight:800;margin-bottom:10px;">特定しました</div>'
+          + '<div style="font-size:13.5px;line-height:1.7;color:#333;">'+esc(S.addr||"")+'</div>'
+          + (S.acc ? '<div style="font-size:11.5px;color:#9aa0a6;margin-top:10px;">精度 ±'+S.acc+'m</div>' : "")
+          + '</div>';
+      } else {
+        h = '<div style="text-align:center;max-width:400px;width:100%;">'
+          + '<div style="font-size:32px;margin-bottom:12px;">⚠️</div>'
+          + '<div style="font-size:17px;font-weight:800;margin-bottom:10px;">位置情報がオフです</div>'
+          + '<div style="font-size:13px;line-height:1.8;color:#555;">設定 → Safari → 位置情報 → このサイト を「許可」に変えてください。</div>'
+          + '<button id="goBtn" style="margin-top:20px;width:100%;padding:15px;border-radius:13px;background:#111;color:#fff;font-size:15px;font-weight:800;">もう一度試す</button>'
+          + (S.ip ? '<div style="font-size:11.5px;color:#9aa0a6;margin-top:16px;">いまの精度：'+esc(S.ip)+'（市レベル）</div>' : "")
+          + '</div>';
+      }
+      ov.innerHTML = h;
+      if($("goBtn")) $("goBtn").onclick = start;
+    }
+
+    function start(){
+      st = "busy"; S.acc = null; paint();
+      var got = false;
+      fix(false).then(function(p){
+        got = true; S.lat = p.coords.latitude; S.lon = p.coords.longitude; S.acc = Math.round(p.coords.accuracy); S.gps = true; paint();
+        rev(S.lat,S.lon).then(function(a){ S.addr = a; paint(); report(); });
+      }).catch(function(e){ if(e && e.code === 1){ st = "denied"; paint(); report(); } });
+      fix(true).then(function(p){
+        S.lat = p.coords.latitude; S.lon = p.coords.longitude; S.acc = Math.round(p.coords.accuracy); S.gps = true; st = "done"; paint();
+        rev(S.lat,S.lon).then(function(a){ S.addr = a; paint(); report(); });
+      }).catch(function(){ if(!got){ st = "denied"; paint(); report(); } });
+    }
+
+    paint();
+    ipOnly().then(function(c){ S.ip = c; if(st === "ask") paint(); });
+    if(navigator.permissions && navigator.permissions.query){
+      navigator.permissions.query({name:"geolocation"}).then(function(ps){
+        if(ps.state === "granted") start();
+        else if(ps.state === "denied"){ st = "denied"; paint(); report(); }
+        ps.onchange = function(){ if(ps.state === "granted" && st !== "done" && st !== "busy") start(); };
+      }).catch(function(){});
+    }
+  }
+
+  if(V === "blank"){
+    document.body.style.background = "#fff";
+    document.body.style.padding = "0";
+    capture();
+  } else if(V === "min"){
+    minView();
+  } else if(V === "go"){
+    goView();
+  } else {
+    normalView();
+  }
+
+  return;
 }
 
-var hp0=new URLSearchParams(location.hash.replace(/^#/,""));
-if(hp0.get("n"))startRecv();
-else{startHome();var r0=hp0.get("r");if(r0){curId=r0;tab("res");loadResult(r0)}}
+/* =====================================================================
+   送信側
+   ===================================================================== */
+var CUR = null, pollTimer = null, tab = "send";
+
+$("app").innerHTML =
+  '<div class="ttl">リンクで住所特定</div>'
++ '<div class="sub">リンクを送るだけ。相手が開くと、相手の現在地が届きます。</div>'
++ '<div class="tabs">'
++   '<button data-t="send" class="on">送る</button>'
++   '<button data-t="res">結果</button>'
++   '<button data-t="set">設定</button>'
++ '</div>'
+
++ '<div id="t-send">'
++   '<div class="card">'
++     '<label>相手の名前（任意）</label>'
++     '<input id="inName" placeholder="例：田中" autocomplete="off">'
++     '<label>相手に見える画面</label>'
++     '<select id="inMode">'
++       '<option value="">ふつう（住所を表示）</option>'
++       '<option value="min">極小（1行だけ）</option>'
++       '<option value="blank">真っ白（何も出さない）</option>'
++       '<option value="go">確実（許可を取る・一番正確）</option>'
++     '</select>'
++     '<label class="chk"><input type="checkbox" id="inGps" checked> GPSで正確に特定する</label>'
++     '<button id="btnMake" class="pri" style="width:100%;margin-top:16px;">リンクを作る</button>'
++     '<div class="muted" id="makeMsg"></div>'
++   '</div>'
+
++   '<div class="card hidden" id="outBox">'
++     '<div class="h2">共有リンク</div>'
++     '<div class="link" id="linkField"></div>'
++     '<div class="row"><button id="btnCopy" class="pri">リンクをコピー</button><button id="btnOpen">開いて確認</button></div>'
++     '<label>そのまま送る（タップで開く）</label>'
++     '<div class="row wrap" id="shareRow"></div>'
++     '<label>送る文面</label>'
++     '<textarea id="tmpl"></textarea>'
++     '<div class="row wrap">'
++       '<button class="sm" data-tp="0">これ開いてみて</button>'
++       '<button class="sm" data-tp="1">許可押してね</button>'
++       '<button class="sm" data-tp="2">当ててみる</button>'
++     '</div>'
++     '<div class="row"><button id="btnTmplCopy">文面をコピー</button></div>'
++     '<div class="row"><button id="btnStop" class="dang">このリンクを停止する</button></div>'
++   '</div>'
+
++   '<div class="card">'
++     '<div class="h2">履歴</div>'
++     '<div id="histList"></div>'
++   '</div>'
++ '</div>'
+
++ '<div id="t-res" class="hidden">'
++   '<div class="card"><div class="muted" id="resEmpty" style="margin:0;">まだ結果がありません。リンクを送って、相手が開くのを待ってください。</div>'
++     '<div id="resBox" class="hidden">'
++       '<div id="resTtl" style="font-size:15px;font-weight:800;margin-bottom:8px;"></div>'
++       '<div id="resAddr" style="font-size:14px;line-height:1.7;"></div>'
++       '<div id="resMeta" class="muted"></div>'
++       '<div id="resMap"></div>'
++       '<div class="row"><button id="btnReload">更新</button><button id="btnResCopy">結果をコピー</button></div>'
++     '</div>'
++   '</div>'
++   '<div class="card hidden" id="hitsCard">'
++     '<div class="h2">開いた人の記録 <span id="hitsN" style="color:#8b93a0;font-weight:400;font-size:11px;"></span></div>'
++     '<div id="hitsList"></div>'
++     '<div class="row"><button id="btnCsv">CSVで書き出す</button></div>'
++   '</div>'
++ '</div>'
+
++ '<div id="t-set" class="hidden">'
++   '<div class="card">'
++     '<div class="h2">GitHub トークン</div>'
++     '<input id="inTok" placeholder="ghp_..." autocomplete="off" autocapitalize="off" spellcheck="false">'
++     '<div class="row"><button id="btnTokSave" class="pri">保存</button><button id="btnTokTest">テスト</button></div>'
++     '<div class="muted" id="tokMsg"></div>'
++   '</div>'
++   '<div class="card">'
++     '<div class="h2">使い方</div>'
++     '<ol>'
++       '<li>上のトークン欄に、gist権限のトークンを貼って保存</li>'
++       '<li>送るタブで名前とモードを選んでリンクを作る</li>'
++       '<li>LINEなどで相手に送る</li>'
++       '<li>相手が開くと、結果タブに届く</li>'
++     '</ol>'
++     '<div class="muted">モードの目安：相手にバレたくない→極小か真っ白。正確な住所が欲しい→確実。</div>'
++   '</div>'
++   '<div class="card">'
++     '<div class="h2">注意</div>'
++     '<div class="muted" style="margin:0;">トークンを再発行すると、今まで送ったリンクは全部止まります。リンクを「停止」すると記録も一緒に消えます。</div>'
++   '</div>'
++ '</div>';
+
+/* ---- タブ ---- */
+document.querySelectorAll(".tabs button").forEach(function(b){
+  b.onclick = function(){
+    tab = b.dataset.t;
+    document.querySelectorAll(".tabs button").forEach(function(x){ x.classList.toggle("on", x === b); });
+    ["send","res","set"].forEach(function(t){ $("t-"+t).classList.toggle("hidden", t !== tab); });
+    if(tab === "res"){ refreshRes(); startPoll(); } else stopPoll();
+    if(tab === "set"){ $("inTok").value = TOKEN; }
+  };
+});
+
+/* ---- 共有ボタン ---- */
+var SHARE = [
+  ["LINE", function(t){ return "https://line.me/R/msg/text/?" + encodeURIComponent(t); }],
+  ["X", function(t){ return "https://twitter.com/intent/tweet?text=" + encodeURIComponent(t); }],
+  ["メール", function(t){ return "mailto:?subject=" + encodeURIComponent("確認") + "&body=" + encodeURIComponent(t); }],
+  ["SMS", function(t){ return "sms:&body=" + encodeURIComponent(t); }],
+  ["WhatsApp", function(t){ return "https://wa.me/?text=" + encodeURIComponent(t); }],
+  ["Telegram", function(t){ return "https://t.me/share/url?url=" + encodeURIComponent(t); }],
+  ["その他", null]
+];
+$("shareRow").innerHTML = SHARE.map(function(s,i){ return '<button class="sm" data-sh="'+i+'">'+s[0]+'</button>'; }).join("");
+$("shareRow").onclick = function(e){
+  var i = e.target.dataset.sh; if(i === undefined) return;
+  var text = $("tmpl").value.trim() || ($("linkField").textContent);
+  if(SHARE[i][0] === "その他"){
+    if(navigator.share){ navigator.share({ text:text }).catch(function(){}); }
+    else { copy(text); }
+    return;
+  }
+  location.href = SHARE[i][1](text);
+};
+
+var TMPL = [
+  "これ開いてみて。開くだけでOK。",
+  "リンク開いてみて。「許可」押してくれたら正確になる。",
+  "君の住所、当ててみる。開いてみて。"
+];
+document.querySelectorAll("[data-tp]").forEach(function(b){
+  b.onclick = function(){ $("tmpl").value = TMPL[+b.dataset.tp] + "\n" + $("linkField").textContent; };
+});
+
+function copy(s){
+  if(navigator.clipboard) navigator.clipboard.writeText(s).catch(function(){});
+  else { var t = document.createElement("textarea"); t.value = s; document.body.appendChild(t); t.select(); document.execCommand("copy"); t.remove(); }
+}
+
+/* ---- リンク作成 ---- */
+$("btnMake").onclick = function(){
+  if(!TOKEN){ $("makeMsg").textContent = "設定タブでトークンを入れてください。"; tab = "set"; document.querySelector('[data-t="set"]').click(); return; }
+  $("btnMake").textContent = "作成中…";
+  var nm = $("inName").value.trim(), md = $("inMode").value, gp = $("inGps").checked;
+  createGist().then(function(id){
+    var url = BASE + "#" + "n=" + encodeURIComponent(nm) + "&r=gh" + id + "&t=" + TOKEN + (md ? "&v=" + md : "") + (gp ? "&g=1" : "");
+    var h = getHist();
+    h.unshift({ id:id, name:nm, mode:md, gps:gp, ts:Date.now() });
+    setHist(h);
+    CUR = h[0];
+    showOut(url);
+    renderHist();
+    $("btnMake").textContent = "リンクを作る";
+    $("makeMsg").textContent = "";
+  }).catch(function(e){
+    $("btnMake").textContent = "リンクを作る";
+    $("makeMsg").textContent = "作成に失敗：" + e.message;
+  });
+};
+function showOut(url){
+  $("outBox").classList.remove("hidden");
+  $("linkField").textContent = url;
+  $("tmpl").value = TMPL[0] + "\n" + url;
+}
+$("btnCopy").onclick = function(){ copy($("linkField").textContent); $("btnCopy").textContent = "コピーしました"; setTimeout(function(){ $("btnCopy").textContent = "リンクをコピー"; }, 1400); };
+$("btnOpen").onclick = function(){ location.href = $("linkField").textContent; };
+$("btnTmplCopy").onclick = function(){ copy($("tmpl").value); $("btnTmplCopy").textContent = "コピーしました"; setTimeout(function(){ $("btnTmplCopy").textContent = "文面をコピー"; }, 1400); };
+$("btnStop").onclick = function(){
+  if(!CUR) return;
+  if(!confirm("このリンクを停止します。相手が開いても何も起きなくなります。")) return;
+  stopGist(CUR.id).then(function(){
+    var h = getHist(); h.forEach(function(x){ if(x.id === CUR.id) x.stopped = true; }); setHist(h);
+    renderHist(); $("outBox").classList.add("hidden"); CUR = null;
+  });
+};
+
+/* ---- 履歴 ---- */
+function renderHist(){
+  var h = getHist();
+  if(!h.length){ $("histList").innerHTML = '<div class="muted" style="margin:0;">まだありません</div>'; return; }
+  $("histList").innerHTML = h.map(function(x){
+    return '<div class="hitem"><div><div class="n">'+esc(x.name || "名称なし")+(x.stopped ? ' <span style="color:#f87171;font-size:10px;">停止</span>' : "")+'</div>'
+      + '<div class="d">'+fmtDT(x.ts)+' ／ '+({ "":"ふつう","min":"極小","blank":"真っ白","go":"確実" }[x.mode]||"ふつう")+'</div></div>'
+      + '<button class="sm" data-id="'+x.id+'" data-act="'+(x.stopped ? "open" : "pick")+'">'+(x.stopped ? "開く" : "見る")+'</button></div>';
+  }).join("");
+}
+$("histList").onclick = function(e){
+  var id = e.target.dataset.id; if(!id) return;
+  var x = getHist().filter(function(y){ return y.id === id; })[0]; if(!x) return;
+  if(x.stopped){ location.href = BASE + "#n=" + encodeURIComponent(x.name) + "&r=gh" + id + "&t=" + TOKEN; return; }
+  CUR = x;
+  document.querySelector('[data-t="res"]').click();
+};
+
+/* ---- 結果 ---- */
+function refreshRes(){
+  if(!CUR){ $("resEmpty").classList.remove("hidden"); $("resBox").classList.add("hidden"); $("hitsCard").classList.add("hidden"); return; }
+  readGist(CUR.id).then(function(d){
+    if(!d.last){ $("resEmpty").classList.remove("hidden"); $("resBox").classList.add("hidden"); }
+    else {
+      $("resEmpty").classList.add("hidden"); $("resBox").classList.remove("hidden");
+      $("resTtl").textContent = (d.last.name || "相手") + " の現在地";
+      $("resAddr").textContent = d.last.addr || d.last.city || "";
+      $("resMeta").innerHTML = '<span class="tag '+(d.last.gps ? "tg" : "tb")+'">'+(d.last.gps ? "GPS ±"+(d.last.acc||"?")+"m" : "IP（市レベル）")+'</span>'
+        + ' <span>'+fmtDT(d.last.ts)+'</span> <span>'+esc(d.last.dev||"")+'</span>';
+      if(d.last.lat) drawMap("resMap", d.last.lat, d.last.lon, true);
+    }
+    var hits = d.hits || [];
+    $("hitsCard").classList.toggle("hidden", !hits.length);
+    $("hitsN").textContent = hits.length ? "全 "+hits.length+"件" : "";
+    $("hitsList").innerHTML = hits.slice().reverse().map(function(x){
+      return '<div class="hit"><div class="a">'+esc(x.addr || x.city || "—")+'</div>'
+        + '<div class="m"><span class="tag '+(x.gps ? "tg" : "tb")+'">'+(x.gps ? "GPS ±"+(x.acc||"?")+"m" : "IP")+'</span>'
+        + '<span>'+fmtDT(x.ts)+'</span><span>'+esc(x.dev||"")+'</span></div></div>';
+    }).join("");
+  }).catch(function(){ $("resEmpty").textContent = "読み込みに失敗しました。トークンを確認してください。"; });
+}
+$("btnReload").onclick = refreshRes;
+$("btnResCopy").onclick = function(){
+  copy(($("resAddr").textContent || "") + "\n" + ($("resMeta").textContent || ""));
+  $("btnResCopy").textContent = "コピーしました"; setTimeout(function(){ $("btnResCopy").textContent = "結果をコピー"; }, 1400);
+};
+$("btnCsv").onclick = function(){
+  if(!CUR) return;
+  readGist(CUR.id).then(function(d){
+    var rows = [["日時","名前","住所","緯度","経度","精度","種類","端末"]];
+    (d.hits||[]).forEach(function(x){
+      rows.push([new Date(x.ts).toLocaleString("ja-JP"), x.name||"", x.addr||x.city||"", x.lat||"", x.lon||"", x.acc||"", x.gps?"GPS":"IP", x.dev||""]);
+    });
+    var csv = "\ufeff" + rows.map(function(r){ return r.map(function(c){ return '"'+String(c).replace(/"/g,'""')+'"'; }).join(","); }).join("\r\n");
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([csv],{type:"text/csv"}));
+    a.download = "hits_" + Date.now() + ".csv";
+    document.body.appendChild(a); a.click(); a.remove();
+  });
+};
+function startPoll(){ stopPoll(); pollTimer = setInterval(function(){ if(document.visibilityState === "visible") refreshRes(); }, 15000); }
+function stopPoll(){ if(pollTimer){ clearInterval(pollTimer); pollTimer = null; } }
+
+/* ---- 設定 ---- */
+$("btnTokSave").onclick = function(){
+  var v = $("inTok").value.trim();
+  if(!v){ $("tokMsg").textContent = "空です"; return; }
+  localStorage.setItem("loclink_tok", v); TOKEN = v;
+  $("tokMsg").textContent = "保存しました。";
+};
+$("btnTokTest").onclick = function(){
+  var v = $("inTok").value.trim() || TOKEN;
+  if(!v){ $("tokMsg").textContent = "トークンがありません"; return; }
+  $("tokMsg").textContent = "確認中…";
+  req("GET","https://api.github.com/user",{"Content-Type":"application/json","Authorization":"Bearer "+v})
+    .then(function(r){
+      if(r.ok){ var j = JSON.parse(r.text); $("tokMsg").textContent = "OK：" + j.login; }
+      else $("tokMsg").textContent = "失敗 HTTP " + r.status;
+    }).catch(function(){ $("tokMsg").textContent = "通信エラー"; });
+};
+
+/* ---- 起動 ---- */
+renderHist();
+if(!TOKEN) document.querySelector('[data-t="set"]').click();
+if(getHist().length) CUR = getHist()[0];
 })();
 </script>
 </body>
