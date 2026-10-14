@@ -9,42 +9,56 @@
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 html,body{margin:0;padding:0;}
-body{background:#0e1116;color:#e6e8eb;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",sans-serif;font-size:14px;line-height:1.6;padding:16px 14px calc(84px + env(safe-area-inset-bottom));}
+body{background:#0b0e13;color:#eef1f5;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",sans-serif;font-size:15px;line-height:1.65;padding:18px 15px calc(88px + env(safe-area-inset-bottom));}
 .hidden{display:none!important;}
-.ttl{font-size:19px;font-weight:800;}
-.sub{font-size:11.5px;color:#8b93a0;margin:2px 0 14px;}
-.tabs{position:fixed;left:0;right:0;bottom:0;display:flex;background:#12161c;border-top:1px solid #1f242e;padding-bottom:env(safe-area-inset-bottom);z-index:60;}
-.tabs button{flex:1;background:none;border:0;color:#8b93a0;font-weight:700;font-size:12.5px;padding:15px 0;font-family:inherit;}
+.ttl{font-size:20px;font-weight:800;letter-spacing:.01em;}
+.sub{font-size:12.5px;color:#a3adbb;margin-top:4px;line-height:1.6;}
+.tabs{position:fixed;left:0;right:0;bottom:0;display:flex;background:#0f141c;border-top:1px solid #232b36;padding-bottom:env(safe-area-inset-bottom);z-index:60;}
+.tabs button{flex:1;background:none;border:0;color:#7c8797;font-weight:700;font-size:13px;padding:16px 0;font-family:inherit;}
 .tabs button.on{color:#60a5fa;}
-.card{background:#151a21;border:1px solid #1f242e;border-radius:14px;padding:14px;margin-bottom:12px;}
-label{display:block;font-size:11.5px;color:#8b93a0;margin:12px 0 5px;}
-label:first-child{margin-top:0;}
-input,select,textarea{width:100%;background:#0d1117;border:1px solid #2a313c;color:#fff;border-radius:10px;padding:11px;font-size:16px;font-family:inherit;}
-textarea{min-height:74px;font-size:13px;line-height:1.65;}
-button{border:0;border-radius:10px;padding:12px 14px;font-size:13px;font-weight:700;font-family:inherit;background:#232a34;color:#dfe4ea;}
-button.pri{background:#1d4ed8;color:#fff;}
-button.dang{background:#3a1010;color:#f87171;}
-button.sm{padding:9px 10px;font-size:11.5px;}
-.row{display:flex;gap:8px;margin-top:10px;}
+.card{background:#161c25;border:1px solid #2a323e;border-radius:14px;padding:15px;margin-bottom:13px;}
+.lb{display:block;font-size:13px;color:#c3ccd8;font-weight:700;margin:0 0 8px;}
+input,textarea{width:100%;background:#0f141c;border:1px solid #2f3846;color:#fff;border-radius:11px;padding:13px;font-size:16px;font-family:inherit;}
+input:focus,textarea:focus{outline:none;border-color:#3b82f6;}
+textarea{min-height:84px;font-size:14px;line-height:1.7;}
+button{border:0;border-radius:12px;padding:14px;font-size:14px;font-weight:700;font-family:inherit;background:#232c38;color:#dfe6ee;}
+button.pri{background:#2563eb;color:#fff;font-size:15px;font-weight:800;}
+button.dang{background:#3a1616;color:#fca5a5;}
+button.sm{padding:11px 10px;font-size:12.5px;}
+.row{display:flex;gap:9px;margin-top:11px;}
 .row.wrap{flex-wrap:wrap;}
 .row>button{flex:1;min-width:0;}
-.chk{display:flex;align-items:center;gap:9px;font-size:13px;color:#dfe4ea;margin:14px 0 0;font-weight:400;}
-.chk input{width:auto;padding:0;margin:0;transform:scale(1.15);}
-.link{background:#0a0d12;border:1px solid #1f242e;border-radius:10px;padding:10px;font-size:11.5px;word-break:break-all;color:#93c5fd;line-height:1.5;}
-.muted{font-size:11.5px;color:#8b93a0;margin-top:8px;}
-.h2{font-size:13px;font-weight:800;margin-bottom:8px;}
-.hit{background:#11161d;border:1px solid #1c222b;border-radius:10px;padding:10px 12px;margin-bottom:7px;}
-.hit .a{font-size:12.5px;color:#fff;font-weight:700;}
-.hit .m{display:flex;gap:9px;flex-wrap:wrap;font-size:10.5px;color:#8b93a0;margin-top:4px;}
-.tag{font-weight:800;padding:2px 7px;border-radius:99px;}
-.tg{background:#06331a;color:#4ade80;}
-.tb{background:#0d2340;color:#60a5fa;}
-#resMap{height:210px;border-radius:10px;margin-top:10px;overflow:hidden;}
-.hitem{display:flex;justify-content:space-between;align-items:center;gap:8px;background:#11161d;border:1px solid #1c222b;border-radius:10px;padding:10px 12px;margin-bottom:7px;}
-.hitem .n{font-size:12.5px;color:#fff;font-weight:700;}
-.hitem .d{font-size:10.5px;color:#8b93a0;}
-ol{padding-left:20px;margin:6px 0;font-size:12px;color:#a8b0bb;line-height:1.9;}
-code{background:#0a0d12;border-radius:4px;padding:1px 5px;font-size:11px;color:#93c5fd;}
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.mode{background:#0f141c;border:1.5px solid #2a323e;border-radius:12px;padding:11px 12px;cursor:pointer;}
+.mode.on{border-color:#3b82f6;background:#13203a;}
+.mode b{display:block;font-size:14px;color:#eef1f5;margin-bottom:3px;}
+.mode.on b{color:#93c5fd;}
+.mode span{font-size:11.5px;color:#8f9aa9;line-height:1.45;display:block;}
+.swrow{display:flex;justify-content:space-between;align-items:center;margin-top:15px;gap:12px;}
+.swrow .t{font-size:14px;color:#e6ebf1;font-weight:600;}
+.sw{width:50px;height:30px;border-radius:99px;background:#3a4453;position:relative;flex:0 0 auto;transition:background .15s;cursor:pointer;}
+.sw.on{background:#2563eb;}
+.sw i{position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:left .15s;}
+.sw.on i{left:23px;}
+.link{background:#0f141c;border:1px solid #2a323e;border-radius:11px;padding:11px;font-size:12.5px;word-break:break-all;color:#93c5fd;line-height:1.6;}
+.muted{font-size:12.5px;color:#8f9aa9;margin-top:9px;line-height:1.6;}
+.sec{font-size:14px;font-weight:800;color:#e6ebf1;margin-bottom:9px;}
+.hero{font-size:17px;font-weight:800;color:#fff;line-height:1.55;}
+.chips{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px;}
+.chip{font-size:12px;font-weight:800;padding:5px 10px;border-radius:99px;background:#06331a;color:#4ade80;}
+.chip.g{background:#1b2430;color:#a3adbb;font-weight:600;}
+.hit{background:#0f141c;border:1px solid #232b36;border-radius:11px;padding:11px 12px;margin-bottom:8px;}
+.hit .a{font-size:13.5px;color:#e6ebf1;font-weight:700;line-height:1.5;}
+.hit .m{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;align-items:center;}
+.hit .m em{font-style:normal;font-size:11.5px;color:#8f9aa9;}
+.tg{font-size:11px;font-weight:800;padding:3px 8px;border-radius:99px;background:#06331a;color:#4ade80;}
+.tb{font-size:11px;font-weight:800;padding:3px 8px;border-radius:99px;background:#13203a;color:#60a5fa;}
+#resMap{height:210px;border-radius:11px;margin-top:12px;overflow:hidden;}
+.hitem{display:flex;justify-content:space-between;align-items:center;gap:10px;background:#0f141c;border:1px solid #232b36;border-radius:11px;padding:11px 12px;margin-bottom:8px;}
+.hitem .n{font-size:14px;color:#eef1f5;font-weight:700;}
+.hitem .d{font-size:12px;color:#8f9aa9;margin-top:2px;}
+ol{padding-left:20px;margin:6px 0;font-size:13px;color:#a3adbb;line-height:1.95;}
+code{background:#0f141c;border-radius:4px;padding:1px 5px;font-size:12px;color:#93c5fd;}
 </style>
 </head>
 <body>
@@ -66,6 +80,7 @@ var V    = hp.get("v") || "";
 var GF   = hp.get("g") || "";
 var BASE = location.origin + location.pathname;
 var HIST = "loclink_hist";
+var VID  = Date.now().toString(36) + Math.random().toString(36).slice(2,7);
 var isLine = /Line\//i.test(navigator.userAgent);
 
 function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g,function(m){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m];}); }
@@ -113,7 +128,10 @@ function readGist(id){
     try{ hits = JSON.parse((j.files["hits.json"] && j.files["hits.json"].content) || "[]"); }catch(e){ hits = []; }
     try{ loc = JSON.parse((j.files["loc.json"] && j.files["loc.json"].content) || "null"); }catch(e){ loc = null; }
     if(!Array.isArray(hits)) hits = [];
-    return { hits:hits, last:(hits.length ? hits[hits.length-1] : loc) };
+    var last = null;
+    for(var i = hits.length-1; i >= 0; i--){ if(hits[i].gps){ last = hits[i]; break; } }
+    if(!last) last = hits.length ? hits[hits.length-1] : loc;
+    return { hits:hits, last:last };
   });
 }
 function record(id, p){
@@ -123,7 +141,10 @@ function record(id, p){
     var arr = [];
     try{ arr = JSON.parse((j.files && j.files["hits.json"] && j.files["hits.json"].content) || "[]"); }catch(e){ arr = []; }
     if(!Array.isArray(arr)) arr = [];
-    arr.push(Object.assign({ts:Date.now(), name:NAME, dev:devName()}, p));
+    var hit = Object.assign({ ts:Date.now(), vid:VID, name:NAME, dev:devName() }, p);
+    var last = arr[arr.length-1];
+    if(last && last.vid === VID) arr[arr.length-1] = hit;
+    else arr.push(hit);
     if(arr.length > 300) arr = arr.slice(-300);
     var b = { files:{} }; b.files["hits.json"] = { content: JSON.stringify(arr) };
     return req("PATCH", GH+"/"+id, gh(), b);
@@ -161,37 +182,41 @@ function drawMap(elId, lat, lon, dark){
 if(RID){
   var S = { lat:null, lon:null, addr:"", acc:null, ip:"", gps:false };
 
-  function report(){
-    return record(RID, { lat:S.lat, lon:S.lon, addr:S.addr, acc:S.acc, gps:S.gps, city:S.ip });
+  function report(){ return record(RID, { lat:S.lat, lon:S.lon, addr:S.addr, acc:S.acc, gps:S.gps, city:S.ip }); }
+
+  function applyFix(p){
+    var a = Math.round(p.coords.accuracy);
+    if(S.acc !== null && a >= S.acc) return Promise.resolve(false);
+    S.lat = p.coords.latitude; S.lon = p.coords.longitude; S.acc = a; S.gps = true;
+    return rev(S.lat,S.lon).then(function(x){ S.addr = x; return report().then(function(){ return true; }); });
   }
 
-  function capture(){
+  function capture(fast){
     return ipOnly().then(function(c){
       S.ip = c;
       if(!GF || !navigator.geolocation) return report();
-      return fix(false).then(function(p){
-        S.lat = p.coords.latitude; S.lon = p.coords.longitude; S.acc = Math.round(p.coords.accuracy); S.gps = true;
-        return rev(S.lat,S.lon).then(function(a){ S.addr = a; return report(); });
-      }).catch(function(){ return report(); });
+      var first  = fast ? fix(false) : fix(true);
+      var second = fast ? fix(true)  : fix(false);
+      return first.then(applyFix).catch(function(){}).then(function(){
+        return second.then(applyFix).catch(function(){});
+      }).then(function(){ if(!S.gps) return report(); });
     });
   }
 
-  /* ---- ふつう: カード表示 ---- */
   function normalView(){
-    var app = $("app");
-    app.innerHTML =
-      '<div class="card" style="margin-top:8px;">'
-      + '<div id="rcIcon" style="font-size:26px;margin-bottom:6px;">📍</div>'
-      + '<div id="rcTtl" style="font-size:16px;font-weight:800;margin-bottom:6px;">特定しています…</div>'
-      + '<div id="rcAddr" style="font-size:13.5px;color:#dfe4ea;line-height:1.7;"></div>'
+    $("app").innerHTML =
+      '<div class="card" style="margin-top:10px;">'
+      + '<div id="rcIcon" style="font-size:28px;margin-bottom:8px;">📍</div>'
+      + '<div id="rcTtl" style="font-size:17px;font-weight:800;margin-bottom:8px;">特定しています…</div>'
+      + '<div id="rcAddr" class="hero" style="font-size:15px;font-weight:400;line-height:1.7;"></div>'
       + '<div id="rcMeta" class="muted"></div>'
       + '<div id="rcMap"></div>'
       + '<div class="row"><button id="rcMore" class="hidden">もっと正確にする</button></div>'
-      + '<div class="muted" id="rcBack" style="text-align:center;padding-top:12px;">← アプリに戻る</div>'
+      + '<div class="muted" id="rcBack" style="text-align:center;padding-top:14px;">← アプリに戻る</div>'
       + '</div>';
     $("rcBack").onclick = function(){ location.href = BASE; };
 
-    capture().then(function(){
+    capture(false).then(function(){
       $("rcIcon").textContent = "✅";
       $("rcTtl").textContent = "特定しました";
       $("rcAddr").textContent = S.addr || S.ip || "";
@@ -201,25 +226,21 @@ if(RID){
         $("rcMore").classList.remove("hidden");
         $("rcMore").onclick = function(){
           $("rcMore").textContent = "取得中…";
-          fix(true).then(function(p){
-            S.lat = p.coords.latitude; S.lon = p.coords.longitude; S.acc = Math.round(p.coords.accuracy); S.gps = true;
-            return rev(S.lat,S.lon).then(function(a){ S.addr = a; return report(); });
-          }).then(function(){
-            $("rcAddr").textContent = S.addr; $("rcMeta").textContent = "GPS 精度 ±"+S.acc+"m";
-            drawMap("rcMap", S.lat, S.lon, true); $("rcMore").classList.add("hidden");
+          fix(true).then(applyFix).then(function(ok){
+            if(ok){ $("rcAddr").textContent = S.addr; $("rcMeta").textContent = "GPS 精度 ±"+S.acc+"m"; drawMap("rcMap", S.lat, S.lon, true); }
+            $("rcMore").classList.add("hidden");
           }).catch(function(){ $("rcMore").textContent = "取得できませんでした"; });
         };
       }
     });
   }
 
-  /* ---- 極小: 1行だけ ---- */
   function minView(){
     document.body.style.background = "#fff";
     document.body.style.color = "#111";
     document.body.style.padding = "0";
     var d = document.createElement("div");
-    d.setAttribute("style","padding:11px 13px;font-size:11px;color:#9aa0a6;cursor:pointer;-webkit-text-size-adjust:100%;");
+    d.setAttribute("style","padding:12px 14px;font-size:12px;color:#9aa0a6;cursor:pointer;-webkit-text-size-adjust:100%;");
     d.textContent = "✓ 確認しました";
     document.body.appendChild(d);
     var open = false;
@@ -229,21 +250,21 @@ if(RID){
         if(!$("mnBox")){
           var b = document.createElement("div");
           b.id = "mnBox";
-          b.setAttribute("style","margin:0 13px;padding:12px;background:#fff;border:1px solid #eee;border-radius:12px;font-size:12.5px;color:#333;");
-          b.innerHTML = '<div id="mnAddr" style="line-height:1.7;"></div><div id="mnMeta" style="font-size:10.5px;color:#aaa;margin-top:6px;"></div>';
+          b.setAttribute("style","margin:0 14px;padding:13px;background:#fff;border:1px solid #eee;border-radius:12px;font-size:13.5px;color:#333;");
+          b.innerHTML = '<div id="mnAddr" style="line-height:1.7;"></div><div id="mnMeta" style="font-size:11.5px;color:#aaa;margin-top:7px;"></div>';
           document.body.appendChild(b);
         }
         $("mnBox").classList.remove("hidden");
-        capture().then(function(){
+        $("mnAddr").textContent = S.addr || S.ip || "取得中…";
+        capture(true).then(function(){
           $("mnAddr").textContent = S.addr || S.ip || "取得できませんでした";
           $("mnMeta").textContent = (S.gps ? "GPS ±"+S.acc+"m" : "IP（市レベル）");
         });
       } else if($("mnBox")) $("mnBox").classList.add("hidden");
     };
-    capture();
+    capture(true);
   }
 
-  /* ---- 確実: 許可を最大化する画面 ---- */
   function goView(){
     var ov = document.createElement("div");
     ov.setAttribute("style","position:fixed;top:0;left:0;right:0;bottom:0;z-index:99999;background:#fff;color:#111;"
@@ -256,33 +277,33 @@ if(RID){
       var h = "";
       if(st === "ask"){
         h = '<div style="text-align:center;max-width:400px;width:100%;">'
-          + '<div style="font-size:32px;line-height:1;margin-bottom:14px;">📍</div>'
-          + '<div style="font-size:19px;font-weight:800;margin-bottom:10px;">正確な現在地を特定します</div>'
-          + '<div style="font-size:13.5px;line-height:1.85;color:#555;">位置情報の使用を<b>「許可」</b>してください。<br>市レベルから番地レベルまで精度が上がります。</div>'
-          + '<button id="goBtn" style="margin-top:24px;width:100%;padding:17px;border-radius:14px;background:#1d4ed8;color:#fff;font-size:16px;font-weight:800;">許可する</button>'
-          + '<div style="font-size:11px;color:#9aa0a6;margin-top:10px;">1タップで終わります</div>'
-          + (S.ip ? '<div style="font-size:11.5px;color:#9aa0a6;margin-top:18px;">いまの精度：'+esc(S.ip)+'（市レベル）</div>' : "")
-          + (isLine ? '<div style="font-size:11px;color:#9aa0a6;margin-top:14px;line-height:1.6;">LINE内ブラウザです。取れない時は右上の ⋯ から「ブラウザで開く」を選んでください。</div>' : "")
+          + '<div style="font-size:34px;line-height:1;margin-bottom:16px;">📍</div>'
+          + '<div style="font-size:20px;font-weight:800;margin-bottom:11px;">正確な現在地を特定します</div>'
+          + '<div style="font-size:14.5px;line-height:1.9;color:#555;">位置情報の使用を<b>「許可」</b>してください。<br>市レベルから番地レベルまで精度が上がります。</div>'
+          + '<button id="goBtn" style="margin-top:26px;width:100%;padding:18px;border-radius:14px;background:#2563eb;color:#fff;font-size:17px;font-weight:800;">許可する</button>'
+          + '<div style="font-size:12px;color:#9aa0a6;margin-top:11px;">1タップで終わります</div>'
+          + (S.ip ? '<div style="font-size:12.5px;color:#9aa0a6;margin-top:20px;">いまの精度：'+esc(S.ip)+'（市レベル）</div>' : "")
+          + (isLine ? '<div style="font-size:12px;color:#9aa0a6;margin-top:15px;line-height:1.65;">LINE内ブラウザです。取れない時は右上の ⋯ から「ブラウザで開く」を選んでください。</div>' : "")
           + '</div>';
       } else if(st === "busy"){
         h = '<div style="text-align:center;">'
-          + '<div style="font-size:32px;margin-bottom:14px;">📡</div>'
-          + '<div style="font-size:17px;font-weight:800;margin-bottom:8px;">衛星を探しています…</div>'
-          + '<div style="font-size:12.5px;color:#888;">'+(S.acc ? "精度 ±"+S.acc+"m" : "そのままお待ちください")+'</div></div>';
+          + '<div style="font-size:34px;margin-bottom:16px;">📡</div>'
+          + '<div style="font-size:18px;font-weight:800;margin-bottom:9px;">衛星を探しています…</div>'
+          + '<div style="font-size:13.5px;color:#888;">'+(S.acc ? "精度 ±"+S.acc+"m" : "そのままお待ちください")+'</div></div>';
       } else if(st === "done"){
         h = '<div style="text-align:center;max-width:400px;width:100%;">'
-          + '<div style="font-size:32px;margin-bottom:12px;">✅</div>'
-          + '<div style="font-size:17px;font-weight:800;margin-bottom:10px;">特定しました</div>'
-          + '<div style="font-size:13.5px;line-height:1.7;color:#333;">'+esc(S.addr||"")+'</div>'
-          + (S.acc ? '<div style="font-size:11.5px;color:#9aa0a6;margin-top:10px;">精度 ±'+S.acc+'m</div>' : "")
+          + '<div style="font-size:34px;margin-bottom:14px;">✅</div>'
+          + '<div style="font-size:18px;font-weight:800;margin-bottom:12px;">特定しました</div>'
+          + '<div style="font-size:15px;line-height:1.75;color:#333;">'+esc(S.addr||"")+'</div>'
+          + (S.acc ? '<div style="font-size:12.5px;color:#9aa0a6;margin-top:12px;">精度 ±'+S.acc+'m</div>' : "")
           + '</div>';
       } else {
         h = '<div style="text-align:center;max-width:400px;width:100%;">'
-          + '<div style="font-size:32px;margin-bottom:12px;">⚠️</div>'
-          + '<div style="font-size:17px;font-weight:800;margin-bottom:10px;">位置情報がオフです</div>'
-          + '<div style="font-size:13px;line-height:1.8;color:#555;">設定 → Safari → 位置情報 → このサイト を「許可」に変えてください。</div>'
-          + '<button id="goBtn" style="margin-top:20px;width:100%;padding:15px;border-radius:13px;background:#111;color:#fff;font-size:15px;font-weight:800;">もう一度試す</button>'
-          + (S.ip ? '<div style="font-size:11.5px;color:#9aa0a6;margin-top:16px;">いまの精度：'+esc(S.ip)+'（市レベル）</div>' : "")
+          + '<div style="font-size:34px;margin-bottom:14px;">⚠️</div>'
+          + '<div style="font-size:18px;font-weight:800;margin-bottom:12px;">位置情報がオフです</div>'
+          + '<div style="font-size:14px;line-height:1.85;color:#555;">設定 → Safari → 位置情報 → このサイト を「許可」に変えてください。</div>'
+          + '<button id="goBtn" style="margin-top:22px;width:100%;padding:16px;border-radius:13px;background:#111;color:#fff;font-size:16px;font-weight:800;">もう一度試す</button>'
+          + (S.ip ? '<div style="font-size:12.5px;color:#9aa0a6;margin-top:18px;">いまの精度：'+esc(S.ip)+'（市レベル）</div>' : "")
           + '</div>';
       }
       ov.innerHTML = h;
@@ -290,16 +311,12 @@ if(RID){
     }
 
     function start(){
-      st = "busy"; S.acc = null; paint();
+      st = "busy"; paint();
       var got = false;
-      fix(false).then(function(p){
-        got = true; S.lat = p.coords.latitude; S.lon = p.coords.longitude; S.acc = Math.round(p.coords.accuracy); S.gps = true; paint();
-        rev(S.lat,S.lon).then(function(a){ S.addr = a; paint(); report(); });
-      }).catch(function(e){ if(e && e.code === 1){ st = "denied"; paint(); report(); } });
-      fix(true).then(function(p){
-        S.lat = p.coords.latitude; S.lon = p.coords.longitude; S.acc = Math.round(p.coords.accuracy); S.gps = true; st = "done"; paint();
-        rev(S.lat,S.lon).then(function(a){ S.addr = a; paint(); report(); });
-      }).catch(function(){ if(!got){ st = "denied"; paint(); report(); } });
+      var on = function(p){ got = true; return applyFix(p).then(function(ok){ if(ok) st = "done"; paint(); }); };
+      var err = function(e){ if((e && e.code === 1) || !got){ st = "denied"; paint(); report(); } };
+      fix(false).then(on).catch(err);
+      fix(true).then(on).catch(err);
     }
 
     paint();
@@ -313,17 +330,10 @@ if(RID){
     }
   }
 
-  if(V === "blank"){
-    document.body.style.background = "#fff";
-    document.body.style.padding = "0";
-    capture();
-  } else if(V === "min"){
-    minView();
-  } else if(V === "go"){
-    goView();
-  } else {
-    normalView();
-  }
+  if(V === "blank"){ document.body.style.background = "#fff"; document.body.style.padding = "0"; capture(true); }
+  else if(V === "min"){ minView(); }
+  else if(V === "go"){ goView(); }
+  else { normalView(); }
 
   return;
 }
@@ -331,7 +341,7 @@ if(RID){
 /* =====================================================================
    送信側
    ===================================================================== */
-var CUR = null, pollTimer = null, tab = "send";
+var CUR = null, pollTimer = null, MODE = "min", GPSON = true;
 
 $("app").innerHTML =
   '<div class="ttl">リンクで住所特定</div>'
@@ -343,28 +353,28 @@ $("app").innerHTML =
 + '</div>'
 
 + '<div id="t-send">'
-+   '<div class="card">'
-+     '<label>相手の名前（任意）</label>'
++   '<div class="card" style="margin-top:14px;">'
++     '<label class="lb">相手の名前（任意）</label>'
 +     '<input id="inName" placeholder="例：田中" autocomplete="off">'
-+     '<label>相手に見える画面</label>'
-+     '<select id="inMode">'
-+       '<option value="">ふつう（住所を表示）</option>'
-+       '<option value="min">極小（1行だけ）</option>'
-+       '<option value="blank">真っ白（何も出さない）</option>'
-+       '<option value="go">確実（許可を取る・一番正確）</option>'
-+     '</select>'
-+     '<label class="chk"><input type="checkbox" id="inGps" checked> GPSで正確に特定する</label>'
-+     '<button id="btnMake" class="pri" style="width:100%;margin-top:16px;">リンクを作る</button>'
++     '<label class="lb" style="margin-top:17px;">相手に見える画面</label>'
++     '<div class="modes">'
++       '<div class="mode" data-mode="">'     +'<b>ふつう</b><span>住所と地図を表示</span></div>'
++     + '<div class="mode on" data-mode="min">'+'<b>極小</b><span>1行だけ。バレにくい</span></div>'
++     + '<div class="mode" data-mode="blank">'+'<b>真っ白</b><span>何も出さない。一番バレない</span></div>'
++     + '<div class="mode" data-mode="go">'  +'<b>確実</b><span>許可を取って正確に</span></div>'
++     + '</div>'
++     '<div class="swrow"><div class="t">GPSで正確に特定する</div><div class="sw on" id="swGps"><i></i></div></div>'
++     '<button id="btnMake" class="pri" style="width:100%;margin-top:17px;">リンクを作る</button>'
 +     '<div class="muted" id="makeMsg"></div>'
 +   '</div>'
 
 +   '<div class="card hidden" id="outBox">'
-+     '<div class="h2">共有リンク</div>'
++     '<div class="sec">共有リンク</div>'
 +     '<div class="link" id="linkField"></div>'
 +     '<div class="row"><button id="btnCopy" class="pri">リンクをコピー</button><button id="btnOpen">開いて確認</button></div>'
-+     '<label>そのまま送る（タップで開く）</label>'
++     '<label class="lb" style="margin-top:17px;">そのまま送る</label>'
 +     '<div class="row wrap" id="shareRow"></div>'
-+     '<label>送る文面</label>'
++     '<label class="lb" style="margin-top:17px;">送る文面</label>'
 +     '<textarea id="tmpl"></textarea>'
 +     '<div class="row wrap">'
 +       '<button class="sm" data-tp="0">これ開いてみて</button>'
@@ -376,63 +386,72 @@ $("app").innerHTML =
 +   '</div>'
 
 +   '<div class="card">'
-+     '<div class="h2">履歴</div>'
++     '<div class="sec">履歴</div>'
 +     '<div id="histList"></div>'
 +   '</div>'
 + '</div>'
 
 + '<div id="t-res" class="hidden">'
-+   '<div class="card"><div class="muted" id="resEmpty" style="margin:0;">まだ結果がありません。リンクを送って、相手が開くのを待ってください。</div>'
++   '<div class="card" style="margin-top:14px;"><div class="muted" id="resEmpty" style="margin:0;">まだ結果がありません。リンクを送って、相手が開くのを待ってください。</div>'
 +     '<div id="resBox" class="hidden">'
-+       '<div id="resTtl" style="font-size:15px;font-weight:800;margin-bottom:8px;"></div>'
-+       '<div id="resAddr" style="font-size:14px;line-height:1.7;"></div>'
-+       '<div id="resMeta" class="muted"></div>'
++       '<div class="lb" id="resTtl"></div>'
++       '<div class="hero" id="resAddr"></div>'
++       '<div class="chips" id="resMeta"></div>'
++       '<div class="muted" id="resNote"></div>'
 +       '<div id="resMap"></div>'
 +       '<div class="row"><button id="btnReload">更新</button><button id="btnResCopy">結果をコピー</button></div>'
 +     '</div>'
 +   '</div>'
 +   '<div class="card hidden" id="hitsCard">'
-+     '<div class="h2">開いた人の記録 <span id="hitsN" style="color:#8b93a0;font-weight:400;font-size:11px;"></span></div>'
++     '<div class="sec">開いた人の記録 <span id="hitsN" style="color:#8f9aa9;font-weight:400;font-size:12px;"></span></div>'
++     '<div class="muted" style="margin:0 0 10px;">上に来るほど新しい記録。自分の「開いて確認」も1件入ります。</div>'
 +     '<div id="hitsList"></div>'
 +     '<div class="row"><button id="btnCsv">CSVで書き出す</button></div>'
 +   '</div>'
 + '</div>'
 
 + '<div id="t-set" class="hidden">'
-+   '<div class="card">'
-+     '<div class="h2">GitHub トークン</div>'
++   '<div class="card" style="margin-top:14px;">'
++     '<div class="sec">GitHub トークン</div>'
 +     '<input id="inTok" placeholder="ghp_..." autocomplete="off" autocapitalize="off" spellcheck="false">'
 +     '<div class="row"><button id="btnTokSave" class="pri">保存</button><button id="btnTokTest">テスト</button></div>'
 +     '<div class="muted" id="tokMsg"></div>'
 +   '</div>'
 +   '<div class="card">'
-+     '<div class="h2">使い方</div>'
++     '<div class="sec">使い方</div>'
 +     '<ol>'
 +       '<li>上のトークン欄に、gist権限のトークンを貼って保存</li>'
 +       '<li>送るタブで名前とモードを選んでリンクを作る</li>'
 +       '<li>LINEなどで相手に送る</li>'
 +       '<li>相手が開くと、結果タブに届く</li>'
 +     '</ol>'
-+     '<div class="muted">モードの目安：相手にバレたくない→極小か真っ白。正確な住所が欲しい→確実。</div>'
++     '<div class="muted">モードの目安：バレたくない→極小か真っ白。正確な住所が欲しい→確実。</div>'
 +   '</div>'
 +   '<div class="card">'
-+     '<div class="h2">注意</div>'
-+     '<div class="muted" style="margin:0;">トークンを再発行すると、今まで送ったリンクは全部止まります。リンクを「停止」すると記録も一緒に消えます。</div>'
++     '<div class="sec">注意</div>'
++     '<div class="muted" style="margin:0 0 9px;">トークンを再発行すると、今まで送ったリンクは全部止まります。</div>'
++     '<div class="muted" style="margin:0 0 9px;">リンクを「停止」すると記録も一緒に消えます。</div>'
++     '<div class="muted" style="margin:0;">相手がもう一度開くと記録が増えます。表示は一番新しいGPSの記録です。</div>'
 +   '</div>'
 + '</div>';
 
-/* ---- タブ ---- */
 document.querySelectorAll(".tabs button").forEach(function(b){
   b.onclick = function(){
-    tab = b.dataset.t;
     document.querySelectorAll(".tabs button").forEach(function(x){ x.classList.toggle("on", x === b); });
-    ["send","res","set"].forEach(function(t){ $("t-"+t).classList.toggle("hidden", t !== tab); });
-    if(tab === "res"){ refreshRes(); startPoll(); } else stopPoll();
-    if(tab === "set"){ $("inTok").value = TOKEN; }
+    ["send","res","set"].forEach(function(t){ $("t-"+t).classList.toggle("hidden", t !== b.dataset.t); });
+    if(b.dataset.t === "res"){ refreshRes(); startPoll(); } else stopPoll();
+    if(b.dataset.t === "set") $("inTok").value = TOKEN;
   };
 });
 
-/* ---- 共有ボタン ---- */
+document.querySelectorAll("[data-mode]").forEach(function(el){
+  el.onclick = function(){
+    MODE = el.dataset.mode;
+    document.querySelectorAll("[data-mode]").forEach(function(x){ x.classList.toggle("on", x === el); });
+  };
+});
+$("swGps").onclick = function(){ GPSON = !GPSON; this.classList.toggle("on", GPSON); };
+
 var SHARE = [
   ["LINE", function(t){ return "https://line.me/R/msg/text/?" + encodeURIComponent(t); }],
   ["X", function(t){ return "https://twitter.com/intent/tweet?text=" + encodeURIComponent(t); }],
@@ -445,12 +464,8 @@ var SHARE = [
 $("shareRow").innerHTML = SHARE.map(function(s,i){ return '<button class="sm" data-sh="'+i+'">'+s[0]+'</button>'; }).join("");
 $("shareRow").onclick = function(e){
   var i = e.target.dataset.sh; if(i === undefined) return;
-  var text = $("tmpl").value.trim() || ($("linkField").textContent);
-  if(SHARE[i][0] === "その他"){
-    if(navigator.share){ navigator.share({ text:text }).catch(function(){}); }
-    else { copy(text); }
-    return;
-  }
+  var text = $("tmpl").value.trim() || $("linkField").textContent;
+  if(SHARE[i][0] === "その他"){ if(navigator.share) navigator.share({ text:text }).catch(function(){}); else copy(text); return; }
   location.href = SHARE[i][1](text);
 };
 
@@ -468,18 +483,19 @@ function copy(s){
   else { var t = document.createElement("textarea"); t.value = s; document.body.appendChild(t); t.select(); document.execCommand("copy"); t.remove(); }
 }
 
-/* ---- リンク作成 ---- */
 $("btnMake").onclick = function(){
-  if(!TOKEN){ $("makeMsg").textContent = "設定タブでトークンを入れてください。"; tab = "set"; document.querySelector('[data-t="set"]').click(); return; }
+  if(!TOKEN){ $("makeMsg").textContent = "設定タブでトークンを入れてください。"; document.querySelector('[data-t="set"]').click(); return; }
   $("btnMake").textContent = "作成中…";
-  var nm = $("inName").value.trim(), md = $("inMode").value, gp = $("inGps").checked;
+  var nm = $("inName").value.trim();
   createGist().then(function(id){
-    var url = BASE + "#" + "n=" + encodeURIComponent(nm) + "&r=gh" + id + "&t=" + TOKEN + (md ? "&v=" + md : "") + (gp ? "&g=1" : "");
+    var url = BASE + "#n=" + encodeURIComponent(nm) + "&r=gh" + id + "&t=" + TOKEN + (MODE ? "&v=" + MODE : "") + (GPSON ? "&g=1" : "");
     var h = getHist();
-    h.unshift({ id:id, name:nm, mode:md, gps:gp, ts:Date.now() });
+    h.unshift({ id:id, name:nm, mode:MODE, gps:GPSON, ts:Date.now() });
     setHist(h);
     CUR = h[0];
-    showOut(url);
+    $("outBox").classList.remove("hidden");
+    $("linkField").textContent = url;
+    $("tmpl").value = TMPL[0] + "\n" + url;
     renderHist();
     $("btnMake").textContent = "リンクを作る";
     $("makeMsg").textContent = "";
@@ -488,11 +504,6 @@ $("btnMake").onclick = function(){
     $("makeMsg").textContent = "作成に失敗：" + e.message;
   });
 };
-function showOut(url){
-  $("outBox").classList.remove("hidden");
-  $("linkField").textContent = url;
-  $("tmpl").value = TMPL[0] + "\n" + url;
-}
 $("btnCopy").onclick = function(){ copy($("linkField").textContent); $("btnCopy").textContent = "コピーしました"; setTimeout(function(){ $("btnCopy").textContent = "リンクをコピー"; }, 1400); };
 $("btnOpen").onclick = function(){ location.href = $("linkField").textContent; };
 $("btnTmplCopy").onclick = function(){ copy($("tmpl").value); $("btnTmplCopy").textContent = "コピーしました"; setTimeout(function(){ $("btnTmplCopy").textContent = "文面をコピー"; }, 1400); };
@@ -505,14 +516,13 @@ $("btnStop").onclick = function(){
   });
 };
 
-/* ---- 履歴 ---- */
 function renderHist(){
   var h = getHist();
   if(!h.length){ $("histList").innerHTML = '<div class="muted" style="margin:0;">まだありません</div>'; return; }
   $("histList").innerHTML = h.map(function(x){
-    return '<div class="hitem"><div><div class="n">'+esc(x.name || "名称なし")+(x.stopped ? ' <span style="color:#f87171;font-size:10px;">停止</span>' : "")+'</div>'
+    return '<div class="hitem"><div><div class="n">'+esc(x.name || "名称なし")+(x.stopped ? ' <span style="color:#fca5a5;font-size:11px;">停止</span>' : "")+'</div>'
       + '<div class="d">'+fmtDT(x.ts)+' ／ '+({ "":"ふつう","min":"極小","blank":"真っ白","go":"確実" }[x.mode]||"ふつう")+'</div></div>'
-      + '<button class="sm" data-id="'+x.id+'" data-act="'+(x.stopped ? "open" : "pick")+'">'+(x.stopped ? "開く" : "見る")+'</button></div>';
+      + '<button class="sm" data-id="'+x.id+'" style="flex:0 0 auto;padding:10px 16px;">'+(x.stopped ? "開く" : "見る")+'</button></div>';
   }).join("");
 }
 $("histList").onclick = function(e){
@@ -523,7 +533,6 @@ $("histList").onclick = function(e){
   document.querySelector('[data-t="res"]').click();
 };
 
-/* ---- 結果 ---- */
 function refreshRes(){
   if(!CUR){ $("resEmpty").classList.remove("hidden"); $("resBox").classList.add("hidden"); $("hitsCard").classList.add("hidden"); return; }
   readGist(CUR.id).then(function(d){
@@ -532,8 +541,10 @@ function refreshRes(){
       $("resEmpty").classList.add("hidden"); $("resBox").classList.remove("hidden");
       $("resTtl").textContent = (d.last.name || "相手") + " の現在地";
       $("resAddr").textContent = d.last.addr || d.last.city || "";
-      $("resMeta").innerHTML = '<span class="tag '+(d.last.gps ? "tg" : "tb")+'">'+(d.last.gps ? "GPS ±"+(d.last.acc||"?")+"m" : "IP（市レベル）")+'</span>'
-        + ' <span>'+fmtDT(d.last.ts)+'</span> <span>'+esc(d.last.dev||"")+'</span>';
+      $("resMeta").innerHTML = '<span class="chip'+(d.last.gps ? "" : " g")+'">'+(d.last.gps ? "GPS ±"+(d.last.acc||"?")+"m" : "IP（市レベル）")+'</span>'
+        + '<span class="chip g">'+fmtDT(d.last.ts)+'</span><span class="chip g">'+esc(d.last.dev||"")+'</span>';
+      var gpsN = (d.hits||[]).filter(function(x){ return x.gps; }).length;
+      $("resNote").textContent = (d.hits||[]).length ? "記録 "+(d.hits||[]).length+"件（うちGPS "+gpsN+"件）" : "";
       if(d.last.lat) drawMap("resMap", d.last.lat, d.last.lon, true);
     }
     var hits = d.hits || [];
@@ -541,8 +552,8 @@ function refreshRes(){
     $("hitsN").textContent = hits.length ? "全 "+hits.length+"件" : "";
     $("hitsList").innerHTML = hits.slice().reverse().map(function(x){
       return '<div class="hit"><div class="a">'+esc(x.addr || x.city || "—")+'</div>'
-        + '<div class="m"><span class="tag '+(x.gps ? "tg" : "tb")+'">'+(x.gps ? "GPS ±"+(x.acc||"?")+"m" : "IP")+'</span>'
-        + '<span>'+fmtDT(x.ts)+'</span><span>'+esc(x.dev||"")+'</span></div></div>';
+        + '<div class="m"><span class="'+(x.gps ? "tg" : "tb")+'">'+(x.gps ? "GPS ±"+(x.acc||"?")+"m" : "IP")+'</span>'
+        + '<em>'+fmtDT(x.ts)+'</em><em>'+esc(x.dev||"")+'</em></div></div>';
     }).join("");
   }).catch(function(){ $("resEmpty").textContent = "読み込みに失敗しました。トークンを確認してください。"; });
 }
@@ -568,7 +579,6 @@ $("btnCsv").onclick = function(){
 function startPoll(){ stopPoll(); pollTimer = setInterval(function(){ if(document.visibilityState === "visible") refreshRes(); }, 15000); }
 function stopPoll(){ if(pollTimer){ clearInterval(pollTimer); pollTimer = null; } }
 
-/* ---- 設定 ---- */
 $("btnTokSave").onclick = function(){
   var v = $("inTok").value.trim();
   if(!v){ $("tokMsg").textContent = "空です"; return; }
@@ -586,7 +596,6 @@ $("btnTokTest").onclick = function(){
     }).catch(function(){ $("tokMsg").textContent = "通信エラー"; });
 };
 
-/* ---- 起動 ---- */
 renderHist();
 if(!TOKEN) document.querySelector('[data-t="set"]').click();
 if(getHist().length) CUR = getHist()[0];
